@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gate Check - Nialike</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>body{font-family:system-ui;background:#000;color:#0f0;padding:15px}input,button{padding:12px;width:100%;margin:5px 0;border-radius:8px;border:0}button{background:#0a1209;color:#0f0;border:1px solid #0f0;font-weight:bold}#list div{background:#111;padding:10px;margin:5px 0;border-radius:6px;border-left:3px solid #0f0}.offline{color:#ff0}</style>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}</script>
+</head>
+<body>
+<h2>🚪 NIALIKE GATE CHECK</h2>
+<p id="status">● Online</p>
+<input id="code" placeholder="Scan QR / Ingiza Code ya Kadi">
+<button onclick="checkIn()">✓ CHECK IN</button>
+<button onclick="sync()">🔄 SYNC SASA (ukipata net)</button>
+<div id="list"></div>
+<script>
+const DB_KEY='nialike_scans';
+function getScans(){return JSON.parse(localStorage.getItem(DB_KEY)||'[]')}
+function saveScans(a){localStorage.setItem(DB_KEY,JSON.stringify(a)); render()}
+function checkIn(){
+  const code=document.getElementById('code').value.trim(); if(!code)return alert('Weka code');
+  const scan={code,time:new Date().toISOString(),synced:false};
+  const arr=getScans(); arr.unshift(scan); saveScans(arr);
+  document.getElementById('code').value=''; 
+  // jaribu kutuma mara moja kama kuna net
+  if(navigator.onLine) sync();
+  else alert('Offline - Imehifadhiwa kwenye simu!');
+}
+function render(){
+  const arr=getScans();
+  document.getElementById('list').innerHTML=arr.map(s=>`<div>${s.code}<br><small>${s.time} ${s.synced?'✅ synced':'<span class=offline>⏳ offline</span>'}</small></div>`).join('')||'<p>Hakuna scans</p>';
+}
+async function sync(){
+  const arr=getScans(); let c=0;
+  for(let s of arr){ if(s.synced)continue;
+    try{ const r=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:s.code,time:s.time})});
+      if(r.ok){s.synced=true;c++} }catch(e){}
+  }
+  saveScans(arr); alert(c?c+' synced!':'Hakuna net au hakuna mpya');
+}
+window.addEventListener('online',()=>{document.getElementById('status').textContent='● Online'; sync()});
+window.addEventListener('offline',()=>document.getElementById('status').textContent='● Offline - scans zinahifadhiwa');
+render();
+</script>
+</body>
+</html>

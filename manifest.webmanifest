@@ -1,0 +1,9 @@
+{
+  "name": "Nialike Go Tech",
+  "short_name": "Nialike",
+  "start_url": "/portal.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#0a1209",
+  "icons": [{"src":"/assets/icons/icon-192.png","sizes":"192x192","type":"image/png"}]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "nialike-go-tech",
+  "version": "1.0.0",
+  "description": "Nialike Go Tech – frontend (root) + backend/ (Node + SQLite, bila dependencies)",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning backend/index.js",
+    "dev": "node --watch --env-file-if-exists=.env --disable-warning=ExperimentalWarning server/index.js",
+    "test": "node --disable-warning=ExperimentalWarning backend/test/api.test.js && node --disable-warning=ExperimentalWarning backend/test/messaging.test.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

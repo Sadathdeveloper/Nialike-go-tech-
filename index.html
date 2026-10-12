@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Mialiko ya WhatsApp, mlango wa QR na ripoti ya wageni kwa sherehe zote Tanzania. WhatsApp invitations, QR entry and guest reports.">
+<meta name="theme-color" content="#0a1209">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nialike"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:title" content="Nialike Go Tech"><meta property="og:description" content="Sherehe yako, imesimamiwa vizuri."><meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230f7a4a'/%3E%3Ctext x='50' y='66' font-size='46' font-family='sans-serif' font-weight='700' fill='%23e0a92e' text-anchor='middle'%3ENG%3C/text%3E%3C/svg%3E">
+<title>Nialike Go Tech | Mialiko ya WhatsApp & Mlango wa QR – Tanzania</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 16v-5M12 16V7M17 16v-3"/></symbol>
+<symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6"/></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.500 3c-1.800 0-3 .5-4.500 2-1.500-1.500-2.700-2-4.500-2A5.500 5.500 0 0 0 2 8.500c0 2.300 1.500 4 3 5.500l7 7z"/></symbol>
+<symbol id="i-grad" viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5zM6 12v5c3 3 9 3 12 0v-5"/></symbol>
+<symbol id="i-cake" viewBox="0 0 24 24"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8M4 16s1.500-1 4-1 3.500 2 6 2 4-1 6-1M2 21h20M7 8v3M12 8v3M17 8v3M7 4h.01M12 4h.01M17 4h.01"/></symbol>
+<symbol id="i-biz" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+<symbol id="i-gov" viewBox="0 0 24 24"><path d="M3 22h18M6 18v-7M10 18v-7M14 18v-7M18 18v-7M12 2 3 8h18z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.100 6.300 6.900 1-5 4.900 1.200 6.800L12 17.800 5.800 21l1.200-6.800-5-4.900 6.900-1z"/></symbol>
+<symbol id="i-wa" viewBox="0 0 24 24"><path d="M3 21l1.600-4.700A9 9 0 1 1 8 19.500z"/><path d="M9 9.500c0 3 2 5.500 5.500 5.500l1.500-1.500-2-1-1 .8c-.8-.4-1.500-1.100-1.900-1.900l.8-1-1-2z"/></symbol>
+<symbol id="i-call" viewBox="0 0 24 24"><path d="M22 17v3a2 2 0 0 1-2.200 2A19.800 19.800 0 0 1 2 4.200 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.700c.1 1 .4 1.900.7 2.800a2 2 0 0 1-.5 2.100L8 9.900a16 16 0 0 0 6 6l1.300-1.300a2 2 0 0 1 2.100-.4c.9.300 1.800.600 2.800.700A2 2 0 0 1 22 17z"/></symbol>
+<symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.300-4.300M11 8v6M8 11h6"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol><symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol><symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/></symbol></defs></svg>
+<nav>
+  <a class="logo" href="#home">Nialike Go <b>Tech</b></a>
+  <div>
+    <a class="l" href="#services" t="Huduma|Services"></a>
+    <a class="l" href="#process" t="Hatua|How it works"></a>
+    <a class="l" href="#pricing" t="Bei|Pricing"></a>
+    <a class="l" href="#track" t="Fuatilia Agizo|Track Order"></a>
+    <a class="l" href="portal.html" t="Portal|Portal"></a>
+    <a class="btn sm" href="#order" t="Agiza|Book"></a>
+    <button class="btn sm" id="inst" hidden onclick="install()"><svg class="ic"><use href="#i-dl"/></svg> <b t="Pakua App|Install App"></b></button>
+    <button class="btn o sm" id="mb" aria-label="Menu" onclick="document.getElementById('mm').classList.toggle('on')"><svg class="ic"><use href="#i-menu"/></svg></button>
+    <button class="btn o sm" id="lg" onclick="setLang()">EN</button>
+  </div>
+</nav>
+<div id="mm" onclick="this.classList.remove('on')"><a href="#services" t="Huduma|Services"></a><a href="#process" t="Hatua|How it works"></a><a href="#pricing" t="Bei|Pricing"></a><a href="#track" t="Fuatilia Agizo|Track Order"></a><a href="#faq" t="Maswali|FAQ"></a><a href="portal.html" t="Portal (Admin / Staff / Mteja)|Portal (Admin / Staff / Client)"></a><a href="#contact" t="Wasiliana|Contact"></a></div>
+
+<section id="home">
+  <p class="eb" t="Huduma ya wageni kwa sherehe Tanzania|Fully managed guest service · Tanzania"></p>
+  <h1><span t="Sherehe yako,|Your celebration,"></span><br><em t="imesimamiwa vizuri.|perfectly managed."></em></h1>
+  <p class="mu" t="Toa orodha ya wageni. Sisi tunatuma mialiko ya WhatsApp, tunasimamia mlango wa QR, na tunakupa ripoti kamili. Wewe uburudike.|Share your guest list. We send WhatsApp invitations, manage QR entry and deliver a full attendance report. You celebrate."></p>
+  <a class="btn" href="#order" t="Agiza Huduma|Book a Service"></a>
+  <a class="btn o" href="#process" t="Jinsi inavyofanya kazi|How it works"></a>
+  <div class="chips" style="justify-content:center">
+    <span><svg class="ic"><use href="#i-ban"/></svg> <b t="Hakuna wasioalikwa|No gate-crashers"></b></span>
+    <span><svg class="ic"><use href="#i-phone"/></svg> <b t="Hakuna app|No app needed"></b></span>
+    <span><svg class="ic"><use href="#i-file"/></svg> <b t="Hakuna kadi za karatasi|No paper cards"></b></span>
+  </div>
+</section>
+
+<section id="services">
+  <p class="eb" t="Huduma Zetu|Our Services"></p>
+  <h2 t="Kila kitu kimesimamiwa|Everything managed"></h2>
+  <div class="g">
+    <div class="c"><div class="i"><svg class="ic"><use href="#i-mail"/></svg></div><h3 t="Mialiko ya WhatsApp|WhatsApp Invitations"></h3><p class="mu" t="Mwaliko wa kitaalamu kwa kila mgeni, SMS kwa wasio na WhatsApp.|Professional invitations to every guest, with SMS fallback."></p></div>
+    <div class="c"><div class="i"><svg class="ic"><use href="#i-qr"/></svg></div><h3 t="Mlango wa QR|QR Admission"></h3><p class="mu" t="Kila mgeni ana QR ya kipekee. Timu yetu inascan mlangoni.|Each guest has a unique QR. Our team scans at the gate."></p></div>
+    <div class="c"><div class="i"><svg class="ic"><use href="#i-chart"/></svg></div><h3 t="Ripoti ya Wageni|Attendance Report"></h3><p class="mu" t="Ona waliofika moja kwa moja, na pata ripoti ya mwisho baada ya sherehe.|See arrivals live and get a final report after the event."></p></div>
+  </div>
+</section>
+
+<section id="process">
+  <p class="eb" t="Hatua|How it works"></p>
+  <h2 t="Hatua 4 tu|Just 4 steps"></h2>
+  <div class="g">
+    <div class="c"><span class="n">01</span><h3 t="Agiza|Order"></h3><p class="mu" t="Chagua pakiti na tuma maelezo ya sherehe.|Pick a package and send your event details."></p></div>
+    <div class="c"><span class="n">02</span><h3 t="Mialiko|Invitations"></h3><p class="mu" t="Tunatuma WhatsApp/SMS yenye QR kwa kila mgeni.|We send WhatsApp/SMS with a QR to every guest."></p></div>
+    <div class="c"><span class="n">03</span><h3 t="Mlango|Gate"></h3><p class="mu" t="Timu yetu ipo siku ya sherehe kusimamia ingizo.|Our team is on site to manage entry."></p></div>
+    <div class="c"><span class="n">04</span><h3 t="Ripoti|Report"></h3><p class="mu" t="Unapata ripoti kamili ya waliohudhuria.|You receive a full attendance report."></p></div>
+  </div>
+  <div class="chips">
+    <span><svg class="ic"><use href="#i-heart"/></svg> <b t="Harusi|Weddings"></b></span><span><svg class="ic"><use href="#i-grad"/></svg> <b t="Send-Off & Kuhitimu|Send-Off & Graduation"></b></span><span><svg class="ic"><use href="#i-cake"/></svg> <b t="Kuzaliwa|Birthdays"></b></span><span><svg class="ic"><use href="#i-biz"/></svg> <b t="Kampuni|Corporate"></b></span><span><svg class="ic"><use href="#i-gov"/></svg> <b t="Serikali|Government"></b></span><span><svg class="ic"><use href="#i-star"/></svg> VIP</span>
+  </div>
+</section>
+
+<section id="pricing">
+  <p class="eb" t="Bei|Pricing"></p>
+  <h2 t="Chagua pakiti (bofya kuchagua)|Pick a package (tap to select)"></h2>
+  <div class="g" id="pkgs">
+    <div class="c pk" data-v="Basic – TZS 150,000"><h3>Basic</h3><div class="p">150,000</div><ul><li t="Hadi wageni 100|Up to 100 guests"></li><li t="Mialiko ya WhatsApp|WhatsApp invites"></li><li t="Mlango wa QR (watu 1)|QR gate (1 staff)"></li><li t="Ripoti ya PDF|PDF report"></li></ul></div>
+    <div class="c pk on" data-v="Standard – TZS 350,000"><span class="tag" t="Maarufu|Popular"></span><h3>Standard</h3><div class="p">350,000</div><ul><li t="Hadi wageni 300|Up to 300 guests"></li><li t="Dashboard ya live|Live dashboard"></li><li t="SMS backup|SMS backup"></li><li t="Watu 2 mlangoni|2 gate staff"></li></ul></div>
+    <div class="c pk" data-v="Premium – TZS 700,000"><h3>Premium</h3><div class="p">700,000</div><ul><li t="Wageni bila kikomo|Unlimited guests"></li><li t="Kadi yenye branding|Branded card"></li><li t="Watu 4+ mlangoni|4+ gate staff"></li><li t="Kila kitu cha Standard|Everything in Standard"></li></ul></div>
+  </div>
+</section>
+
+<section id="order">
+  <p class="eb" t="Agiza|Book"></p>
+  <h2 t="Tuma agizo lako kwa WhatsApp|Send your booking on WhatsApp"></h2>
+  <p class="mu" t="Jaza fomu, tutakupigia ndani ya masaa 2–4 kuthibitisha na malipo.|Fill in the form; we'll reply within 2–4 hours to confirm and arrange payment."></p>
+  <h3 style="margin-top:28px" t="1. Chagua kadi ya mwaliko|1. Choose your invitation card"></h3>
+  <div class="cds" id="cds">
+    <div class="cd on" data-v="Blush Floral QR"><img src="assets/cards/card1.jpg" alt="Blush Floral QR" loading="lazy"><span>Blush Floral QR</span><button type="button" aria-label="Zoom" onclick="zoom(event,1)"><svg class="ic"><use href="#i-zoom"/></svg></button></div>
+    <div class="cd" data-v="Lace &amp; Ribbon"><img src="assets/cards/card2.jpg" alt="Lace &amp; Ribbon" loading="lazy"><span>Lace &amp; Ribbon</span><button type="button" aria-label="Zoom" onclick="zoom(event,2)"><svg class="ic"><use href="#i-zoom"/></svg></button></div>
+    <div class="cd" data-v="Golden Rose"><img src="assets/cards/card3.jpg" alt="Golden Rose" loading="lazy"><span>Golden Rose</span><button type="button" aria-label="Zoom" onclick="zoom(event,3)"><svg class="ic"><use href="#i-zoom"/></svg></button></div>
+    <div class="cd" data-v="Ivory &amp; Emerald"><img src="assets/cards/card4.jpg" alt="Ivory &amp; Emerald" loading="lazy"><span>Ivory &amp; Emerald</span><button type="button" aria-label="Zoom" onclick="zoom(event,4)"><svg class="ic"><use href="#i-zoom"/></svg></button></div>
+    <div class="cd" data-v="Emerald Heritage"><img src="assets/cards/card5.jpg" alt="Emerald Heritage" loading="lazy"><span>Emerald Heritage</span><button type="button" aria-label="Zoom" onclick="zoom(event,5)"><svg class="ic"><use href="#i-zoom"/></svg></button></div>
+    <div class="cd" data-v="Forest Duo"><img src="assets/cards/card6.jpg" alt="Forest Duo" loading="lazy"><span>Forest Duo</span><button type="button" aria-label="Zoom" onclick="zoom(event,6)"><svg class="ic"><use href="#i-zoom"/></svg></button></div>
+    <div class="cd" data-v="Crimson Romance"><img src="assets/cards/card7.jpg" alt="Crimson Romance" loading="lazy"><span>Crimson Romance</span><button type="button" aria-label="Zoom" onclick="zoom(event,7)"><svg class="ic"><use href="#i-zoom"/></svg></button></div>
+    </div>
+  <p class="ok" id="cnote"></p>
+  <h3 t="2. Maelezo, wageni na malipo|2. Details, guests and payment"></h3>
+  <div id="lb" onclick="this.classList.remove('on')"><img alt=""></div>
+  <form onsubmit="send(event)">
+    <div class="r"><input id="n" required placeholder="Jina / Name"><input id="ph" type="tel" required placeholder="+255 7XX XXX XXX"></div>
+    <select id="ev"><option>Harusi / Wedding</option><option>Send-Off / Graduation</option><option>Birthday</option><option>Corporate</option><option>Government</option><option>VIP</option></select>
+    <input id="en" required placeholder="Jina la tukio / Event name">
+    <div class="r"><input id="d" type="date" required><input id="t" type="time" required></div>
+    <input id="v" required placeholder="Mahali / Venue">
+    <input id="gc" type="number" min="1" required placeholder="Idadi ya wageni / Guests">
+    <select id="lang"><option value="Kiswahili">Lugha ya mwaliko: Kiswahili</option><option value="English">Invitation language: English</option><option value="Both">Kiswahili & English</option></select>
+    <label t="Orodha ya wageni (jina + namba)|Guest list (name + phone)"></label>
+    <div class="gl" id="gl"></div>
+    <button type="button" class="btn o" onclick="addG()" t="+ Ongeza mgeni|+ Add guest"></button>
+    <textarea id="bulk" rows="3" placeholder="Au bandika orodha nyingi / Or paste many: Jina, 0712345678"></textarea>
+    <label t="Pakia orodha (.csv / .txt: jina, namba)|Upload list (.csv / .txt: name, phone)"></label>
+    <input type="file" id="fu" accept=".csv,.txt">
+    <label t="Huduma za ziada (hiari)|Extras (optional)"></label>
+    <div class="ex"><label><input type="checkbox" value="SMS backup"><span t="SMS backup|SMS backup"></span></label><label><input type="checkbox" value="Wafanyakazi wa ziada"><span t="Wafanyakazi wa ziada|Extra gate staff"></span></label><label><input type="checkbox" value="Kadi maalum"><span t="Kadi maalum|Custom card design"></span></label><label><input type="checkbox" value="Kupiga simu kwa wageni"><span t="Kuwapigia wageni simu|Guest follow-up calls"></span></label></div>
+    <select id="pay"><option>M-Pesa</option><option>Tigo Pesa</option><option>Airtel Money</option><option>HaloPesa</option></select>
+    <textarea id="nt" rows="3" placeholder="Maombi maalum / Notes"></textarea>
+    <div class="c" id="sm"></div>
+    <button class="btn w"><svg class="ic"><use href="#i-wa"/></svg> <b t="Tuma kwa WhatsApp|Send on WhatsApp"></b></button>
+  </form>
+  <div id="done" style="margin-top:14px"></div>
+</section>
+
+<section id="about">
+  <p class="eb" t="Kuhusu Sisi|About us"></p>
+  <h2 t="Timu inayosimamia wageni wako|The team behind your guests"></h2>
+  <p class="mu" t="Nialike Go Tech inasimamia safari nzima ya mgeni: mwaliko, mlango wa QR na ripoti ya mwisho.|Nialike Go Tech manages the whole guest journey: invitation, QR entry and final report."></p>
+  <div class="ab">
+    <div class="c"><b class="n">QR</b><p class="mu" t="Kila mgeni ana QR ya kipekee.|Every guest has a unique QR."></p></div>
+    <div class="c"><b class="n">LIVE</b><p class="mu" t="Mwenyeji anaona waliofika moja kwa moja.|Hosts see arrivals live."></p></div>
+    <div class="c"><b class="n" t="BAADA|AFTER"></b><p class="mu" t="Ripoti ya mwisho, na data inafutwa ukiomba.|Final report, and your data is deleted on request."></p></div>
+  </div>
+</section>
+
+<section id="track">
+  <p class="eb" t="Fuatilia Agizo|Track Order"></p>
+  <h2 t="Angalia hali ya agizo lako|Check your order status"></h2>
+  <p class="mu" t="Weka namba ya agizo uliyopewa (NGT-XXXXXX). Utaona hali na maelekezo ya malipo yakiwa tayari.|Enter your order number (NGT-XXXXXX). You will see the status and payment instructions when ready."></p>
+  <div class="r" style="max-width:480px;margin-top:16px"><input id="tr" placeholder="NGT-XXXXXX" style="text-transform:uppercase"><button class="btn" type="button" onclick="track()" t="Angalia|Check"></button></div>
+  <div id="trr" class="c" style="display:none;margin-top:14px;max-width:480px"></div>
+</section>
+
+<section id="portal">
+  <p class="eb">Portal</p>
+  <h2 t="Ingia kwenye mfumo|Sign in to the system"></h2>
+  <p class="mu" t="Kila mtumiaji anaingia kwa PIN yake kwenye ukurasa mmoja.|Everyone signs in with their PIN on one page."></p>
+  <div class="g">
+    <a class="c" href="portal.html"><div class="i"><svg class="ic"><use href="#i-chart"/></svg></div><h3>Admin</h3><p class="mu" t="Matukio, wageni, kadi, mialiko ya WhatsApp, watumiaji na ripoti.|Events, guests, cards, WhatsApp invites, users and reports."></p></a>
+    <a class="c" href="portal.html"><div class="i"><svg class="ic"><use href="#i-qr"/></svg></div><h3 t="Msimamizi wa mlango|Gate staff"></h3><p class="mu" t="Scan QR ya wageni, ingiza kwa jina, na wageni wa ziada.|Scan guest QR codes, check in by name, add walk-ins."></p></a>
+    <a class="c" href="portal.html"><div class="i"><svg class="ic"><use href="#i-phone"/></svg></div><h3 t="Mteja|Client"></h3><p class="mu" t="Ona waliofika moja kwa moja na pakua ripoti ya tukio lako.|See arrivals live and download your event report."></p></a>
+  </div>
+  <p style="margin-top:18px"><a class="btn" href="portal.html" t="Fungua Portal|Open Portal"></a></p>
+</section>
+
+<section id="faq">
+  <p class="eb">FAQ</p>
+  <h2 t="Maswali ya kawaida|Common questions"></h2>
+  <details><summary t="Wageni wanahitaji app?|Do guests need an app?"></summary><p t="Hapana. Wanapokea WhatsApp au SMS na kufungua QR moja kwa moja.|No. They receive WhatsApp/SMS and open their QR directly."></p></details>
+  <details><summary t="Nani anasimamia mlango?|Who manages the gate?"></summary><p t="Timu yetu, kuanzia mwanzo hadi mgeni wa mwisho.|Our team, from start until the last guest."></p></details>
+  <details><summary t="Mtandao ukikatika?|If internet goes down?"></summary><p t="Vifaa vyetu vinafanya kazi offline na tuna orodha ya akiba.|Our devices work offline and we carry a backup list."></p></details>
+  <details><summary t="Mnahudumia mikoa gani?|Which regions?"></summary><p t="Tanzania nzima: Dar, Zanzibar, Arusha, Mwanza, Dodoma na kwingineko.|All of Tanzania: Dar, Zanzibar, Arusha, Mwanza, Dodoma and more."></p></details>
+</section>
+
+<section id="contact">
+  <h2 t="Sisi tunasimamia. Wewe unafurahi.|We manage. You celebrate."></h2>
+  <p class="mu" style="margin-bottom:20px" t="Jibu ndani ya masaa 2–4 · Data ya wageni inalindwa|Reply within 2–4 hours · Guest data protected"></p>
+  <a class="btn w" href="https://wa.me/255692081628" target="_blank" rel="noopener"><svg class="ic"><use href="#i-wa"/></svg> WhatsApp</a>
+  <a class="btn o" href="tel:+255692081628"><svg class="ic"><use href="#i-call"/></svg> +255 692 081 628</a>
+</section>
+
+<footer>
+  <div class="so"><a href="#" aria-label="Facebook">Facebook</a><a href="#" aria-label="Instagram">Instagram</a><a href="#" aria-label="TikTok">TikTok</a></div>
+  <p><a href="tel:+255692081628">+255 692 081 628</a> · Dar es Salaam, Tanzania</p>
+  <p style="margin-top:6px"><a href="portal.html" t="Staff / Admin / Mteja|Staff / Admin / Client"></a></p>
+  <p style="margin-top:6px"><a href="#" onclick="doc('p');return false" t="Sera ya Faragha|Privacy Policy"></a> · <a href="#" onclick="doc('t');return false" t="Masharti|Terms"></a></p>
+  <p style="margin-top:6px">© 2026 Nialike Go Tech</p>
+</footer>
+<dialog id="dg"><div id="dgb"></div><button class="btn sm" onclick="this.parentElement.close()">OK</button></dialog>
+<a id="up" href="#home" aria-label="Top"><svg class="ic"><use href="#i-up"/></svg></a>
+<a class="wa" href="https://wa.me/255692081628" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="ic"><use href="#i-wa"/></svg></a>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>

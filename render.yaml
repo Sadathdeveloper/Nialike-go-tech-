@@ -1,0 +1,7 @@
+services:
+    - type: web
+    name: nialike-go-tech
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node backend/index.js
