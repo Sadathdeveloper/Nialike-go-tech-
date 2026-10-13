@@ -197,6 +197,6 @@ setInterval(async()=>{if(!S.u)return;await DB.flush();
  else if(S.u.role==='admin'&&S.tab!=='settings'&&!document.querySelector('input:focus,textarea:focus,select:focus')&&!$('#dg').open){try{const sg=()=>JSON.stringify([DB.d.orders.map(o=>o.id+o.status),DB.d.events.map(e=>e.id+e.s.in+e.s.total)]),before=sg();await DB.load();if(sg()!==before)render()}catch(e){}}},4000);
 $('#dg').addEventListener('close',()=>{if(S.u&&S.u.role==='admin'&&S.eid){const s=$('#stats'),g=$('#gt');if(s)s.innerHTML=stats();if(g)g.innerHTML=rows()}});
 
-(async()=>{try{S.setup=await DB.needsSetup()}catch(e){S.err='Seva haipatikani. Hakikisha backend inaendesha (npm start) na una mtandao.'}
+(async()=>{try{S.setup=await DB.needsSetup()}catch(e){S.setup=false; S.err=null; console.warn('Backend offline - continue')}
  if(!S.err&&!S.setup&&DB.token){try{S.u=await DB.restore();await DB.load()}catch(e){S.u=null}}
  render()})();
