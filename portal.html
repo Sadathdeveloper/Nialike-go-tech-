@@ -1,87 +1,25 @@
 <!DOCTYPE html>
 <html lang="sw">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nialike Go Tech - Portal</title>
-<style>
-:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--gold:#facc15;--green:#22c55e}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:#e2e8f0;font-family:system-ui,sans-serif}
-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#020617;border-bottom:1px solid var(--border);position:sticky;top:0}
-header b{color:var(--gold)}.badge{background:#422006;color:var(--gold);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
-.tabs{display:flex;gap:8px;overflow:auto;padding:12px 16px}.tab{padding:10px 16px;border-radius:20px;border:1px solid var(--border);background:var(--card);white-space:nowrap;font-size:13px}
-.tab.active{background:var(--green);color:#000;font-weight:800;border-color:var(--green)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px}.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}.kpi b{font-size:22px;color:var(--green)}.kpi span{display:block;font-size:12px;color:#94a3b8;margin-top:4px}
-.empty{background:var(--card);border:1px dashed var(--border);margin:16px;border-radius:12px;padding:16px;color:#94a3b8;font-size:13px}
-.form{background:var(--card);border:1px solid var(--border);border-radius:14px;margin:16px;padding:14px;display:grid;gap:10px}
-.form input,.form select{background:#020617;border:1px solid var(--border);color:#fff;padding:12px;border-radius:10px;width:100%}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn-green{background:var(--green);color:#000;border:none;padding:12px;border-radius:10px;font-weight:800;width:100%}
-#loginBox{position:fixed;inset:0;background:rgba(2,6,23,0.95);display:flex;justify-content:center;align-items:center;z-index:99}
-.login-card{background:var(--card);border:1px solid var(--border);padding:28px;border-radius:18px;width:90%;max-width:350px;text-align:center}
-.login-card input{width:100%;padding:14px;border-radius:12px;background:#020617;border:2px solid var(--green);color:#fff;font-size:22px;letter-spacing:6px;text-align:center;margin:15px 0}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1209">
+<title>Nialike Go Tech · Portal (Admin / Staff / Mteja)</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/portal.css">
+    <script>
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').then(()=>console.log('PWA Ready'));
+  }
+    </script>
 </head>
 <body>
-<header><div><b>Nialike Go Tech</b></div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;color:#94a3b8">Dat tech</span><span class="badge" id="roleBadge">ADMIN</span><button onclick="logout()" style="background:var(--card);border:1px solid var(--border);color:#fff;border-radius:20px;padding:6px 12px;font-size:12px">Toka</button></div></header>
-
-<div class="tabs">
-<div class="tab active">🏷️ Matukio</div><div class="tab">📦 Maagizo</div><div class="tab">👤 Watumiaji</div><div class="tab">⚙️ Mipangilio</div>
-</div>
-
-<h2 style="padding:0 16px">Matukio (0)</h2>
-<div class="grid">
-<div class="kpi"><b>0</b><span>Matukio</span></div><div class="kpi"><b>0</b><span>Wageni wote</span></div><div class="kpi"><b>0</b><span>Walioingia</span></div><div class="kpi"><b>0</b><span>Maagizo mapya</span></div>
-</div>
-<div class="empty">Hakuna matukio bado. Tengeneza kutoka kwenye agizo, au hapa chini.</div>
-
-<div style="padding:0 16px;font-weight:700">+ Tukio jipya</div>
-<div class="form">
-<div class="form-row"><input placeholder="Jina la tukio *"><input placeholder="Aina (Harusi...)"></div>
-<div class="form-row"><input type="date"><input type="time"></div>
-<input placeholder="Mahali *">
-<select><option>Standard</option><option>Premium</option></select>
-<select><option>Blush Floral QR</option><option>Classic</option></select>
-<button class="btn-green">💾 Hifadhi</button>
-</div>
-
-<div style="padding:0 16px 80px">
-<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:12px">
-<h3 style="margin:0 0 10px">Badilisha PIN yangu</h3>
-<div style="display:flex;gap:8px"><input id="newPin" placeholder="PIN mpya (tarakimu 6-8)" style="flex:1"><button onclick="changePin()" style="background:var(--green);border:none;padding:10px 14px;border-radius:10px;font-weight:700">Badilisha</button></div>
-</div>
-</div>
-
-<!-- LOGIN OVERLAY - Itaonekana tu kama haja-login -->
-<div id="loginBox">
-<div class="login-card">
-<h2 style="margin:0">NIALIKE GO TECH</h2>
-<p style="color:#94a3b8;font-size:12px">Ingia kuendelea</p>
-<input id="pinInput" type="password" placeholder="••••••" maxlength="6">
-<button onclick="doLogin()" style="width:100%;padding:14px;background:var(--green);border:none;border-radius:12px;font-weight:900">INGIA PORTAL</button>
-<p id="loginMsg" style="margin-top:12px;font-size:13px;display:none;padding:10px;border-radius:8px"></p>
-<p style="color:#64748b;font-size:11px;margin-top:12px">123456=Admin | 111111=Staff | 000000=Mteja</p>
-</div>
-</div>
-
-<script>
-const PINS={ "123456":"admin", "111111":"staff", "000000":"mteja" };
-function checkAuth(){
-  const role=localStorage.getItem('nialike_role');
-  if(role){ document.getElementById('loginBox').style.display='none'; document.getElementById('roleBadge').textContent=role.toUpperCase(); }
-  else{ document.getElementById('loginBox').style.display='flex'; }
-}
-function doLogin(){
-  const pin=document.getElementById('pinInput').value.trim();
-  const msg=document.getElementById('loginMsg');
-  if(!PINS[pin]){ msg.style.display='block'; msg.style.background='#7f1d1d'; msg.style.color='#fca5a5'; msg.textContent='PIN sio sahihi! Jaribu 123456'; return; }
-  localStorage.setItem('nialike_role',PINS[pin]); localStorage.setItem('nialike_logged','true');
-  msg.style.display='block'; msg.style.background='#14532d'; msg.style.color='#86efac'; msg.textContent='Karibu '+PINS[pin].toUpperCase();
-  setTimeout(()=>{ document.getElementById('loginBox').style.display='none'; location.reload(); },600);
-}
-function logout(){ localStorage.clear(); location.reload(); }
-function changePin(){ alert('PIN imebadilishwa (demo)'); }
-document.getElementById('pinInput').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
-checkAuth();
-</script>
+<div id="app"></div>
+<dialog id="dg"></dialog>
+<script src="js/config.js"></script>
+<script src="js/store.js"></script>
+<script src="js/qrcode.js"></script>
+<script src="js/card.js"></script>
+<script src="js/portal.js"></script>
 </body>
 </html>
