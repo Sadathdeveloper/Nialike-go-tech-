@@ -2,19 +2,47 @@
 <html lang="sw">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a1209">
-<title>Nialike Go Tech · Portal (Admin / Staff / Mteja)</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="css/portal.css">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal - NIALIKE GO TECH</title>
+<style>
+body{background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:sans-serif;margin:0}
+.card{background:#1e293b;padding:30px;border-radius:20px;width:360px;border:1px solid #334155}
+input{width:100%;padding:15px;border-radius:12px;background:#020617;color:#fff;font-size:24px;text-align:center;letter-spacing:7px;border:2px solid #22c55e;box-sizing:border-box;margin:15px 0;outline:none}
+button{width:100%;padding:15px;background:#22c55e;border:none;border-radius:12px;font-weight:900;font-size:18px;cursor:pointer}
+#msg{margin-top:15px;padding:12px;border-radius:10px;text-align:center;font-weight:bold;display:none}
+.ok{display:block!important;background:#14532d;color:#86efac;border:1px solid #22c55e}
+.err{display:block!important;background:#7f1d1d;color:#fca5a5;border:1px solid #ef4444}
+</style>
 </head>
 <body>
-<div id="app"></div>
-<dialog id="dg"></dialog>
-<script src="js/config.js"></script>
-<script src="js/store.js"></script>
-<script src="js/qrcode.js"></script>
-<script src="js/card.js"></script>
-<script src="js/portal.js"></script>
+<div class="card">
+<h2 style="text-align:center;margin:0">NIALIKE GO TECH</h2>
+<p style="text-align:center;color:#94a3b8;font-size:12px">Admin Portal</p>
+<input id="pin" type="password" placeholder="••••••" maxlength="6" inputmode="numeric">
+<button onclick="login()">INGIA PORTAL</button>
+<div id="msg"></div>
+<p style="text-align:center;color:#64748b;font-size:11px;margin-top:20px;line-height:1.7">
+PIN za Kujaribu:<br>
+<span style="color:#22c55e;font-weight:bold">123456</span> = Admin<br>
+<span style="color:#60a5fa">111111</span> = Staff | <span>000000</span> = Mteja
+</p>
+</div>
+<script>
+function login(){
+  var p=document.getElementById('pin').value.trim();
+  var m=document.getElementById('msg');
+  var MAP={ "123456":"admin", "111111":"staff", "000000":"mteja" };
+  if(!p){ m.className='err'; m.textContent='Ingiza PIN kwanza!'; m.style.display='block'; return; }
+  if(MAP[p]){
+    localStorage.setItem('nialike_role',MAP[p]);
+    localStorage.setItem('nialike_logged','true');
+    m.className='ok'; m.textContent='Karibu '+MAP[p].toUpperCase()+'! Inaelekeza...'; m.style.display='block';
+    setTimeout(function(){ window.location.href = MAP[p]==='admin'? 'admin.html' : 'index.html'; }, 800);
+  } else {
+    m.className='err'; m.textContent='PIN sio sahihi! Jaribu: 123456'; m.style.display='block';
+  }
+}
+document.getElementById('pin').addEventListener('keypress',function(e){ if(e.key==='Enter') login(); });
+</script>
 </body>
 </html>
