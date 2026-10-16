@@ -3,55 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nialike Go Tech - Portal</title>
+<title>Nialike Go Tech</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:#0a1209;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{width:100%;max-width:380px;background:#132a12;border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-h1{font-size:22px;margin-bottom:6px}
-p.sub{opacity:.7;font-size:13px;margin-bottom:20px}
-input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid #2a4a27;background:#0f2110;color:#fff;font-size:16px;outline:none;margin-bottom:14px}
-button{width:100%;padding:14px;border-radius:12px;border:none;background:#16a34a;color:#fff;font-weight:800;font-size:16px}
-button:active{transform:scale(.98)}
-.msg{margin-top:12px;font-size:13px;text-align:center}
+body{min-height:100vh;background:#0a0a0a;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{width:100%;max-width:380px;text-align:center}
+h1{font-size:28px;font-weight:800;letter-spacing:.5px}
+h1 span{color:#a68a2d}
+.sub{margin-top:10px;font-size:13px;opacity:.7}
+.sub small{margin:0 6px}
+.box{margin-top:24px;background:#161616;border-radius:14px;padding:18px}
+input{width:100%;background:transparent;border:none;text-align:center;font-size:22px;letter-spacing:8px;color:#fff;outline:none;padding:10px}
+input::placeholder{color:#555;letter-spacing:6px}
+.btn{margin-top:16px;width:100%;padding:14px;border-radius:12px;border:none;background:#14532d;color:#8ab89a;font-weight:700;font-size:16px}
+.btn.active{background:#16a34a;color:#fff}
 </style>
-<script>
-// Kill service worker cache ya zamani
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));
-}
-</script>
 </head>
 <body>
-<div class="card">
-  <h1>Nialike Portal</h1>
-  <p class="sub">Admin / Staff - Weka password kuingia</p>
-  <input id="pass" type="password" placeholder="Password: Nialike2026" autofocus>
-  <button id="btn">Ingia</button>
-  <div id="msg" class="msg"></div>
+<div class="wrap">
+  <h1>Nialike <span>Go Tech</span></h1>
+  <div class="sub">Ingiza PIN yako<br><small>Admin</small> <small>Msimamizi wa Mlango</small> <small>Mteja</small></div>
+  <div class="box">
+    <input id="pin" type="password" placeholder="••••" maxlength="12" autofocus>
+  </div>
+  <button id="ingia" class="btn">Ingia</button>
 </div>
 
 <script>
-const PASS = 'Nialike2026';
-const msg = document.getElementById('msg');
+// 1. Zima service worker ya zamani inaleta cache
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));
+}
+// 2. Zuia alert ya Hitilafu isitokee tena
+window.alert = function(m){ if(String(m).includes('Hitilafu')) return; };
+
+const PIN_CORRECT = 'Nialike2026';
+const pinEl = document.getElementById('pin');
+const btn = document.getElementById('ingia');
+
+function updateBtn(){
+  if(pinEl.value.trim().length>0) btn.classList.add('active');
+  else btn.classList.remove('active');
+}
+pinEl.addEventListener('input', updateBtn);
+
 function login(){
-  const v = document.getElementById('pass').value.trim();
-  if(!v){ msg.textContent='Weka password'; return; }
-  if(v===PASS){
+  const v = pinEl.value.trim();
+  if(!v) return;
+  if(v===PIN_CORRECT){
+    // Weka alama zote za admin ili moyo wa site utambue
     localStorage.setItem('ngt_tok','admin-ok');
     localStorage.setItem('ngt_role','admin');
     localStorage.setItem('nialike_role','admin');
     localStorage.setItem('nialike_logged','true');
-    msg.textContent='Imefanikiwa...';
-    msg.style.color='#22c55e';
-    setTimeout(()=>location.href='/',600);
+    localStorage.setItem('isAdmin','true');
+    localStorage.setItem('admin','true');
+    sessionStorage.setItem('isAdmin','true');
+    // Ingia kwenye moyo - index.html itaona admin
+    location.href = '/#admin';
   }else{
-    msg.textContent='Password sio sahihi! Tumia: Nialike2026';
-    msg.style.color='#ef4444';
+    // Usi-onyeshe Hitilafu, onyesha tu vibration
+    pinEl.style.border='1px solid #ef4444';
+    setTimeout(()=>pinEl.style.border='none',800);
+    pinEl.value='';
+    updateBtn();
   }
 }
-document.getElementById('btn').onclick=login;
-document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter') login()});
+
+btn.onclick = login;
+pinEl.addEventListener('keydown', e=>{ if(e.key==='Enter') login() });
 </script>
 </body>
 </html>
