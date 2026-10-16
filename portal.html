@@ -6,52 +6,49 @@
 <title>Nialike Go Tech</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0a0a0a;color:#fff;font-family:system-ui;display:flex;justify-content:center;padding-top:70px;min-height:100vh}
-.wrap{width:92%;max-width:320px;text-align:center}
-h1{font-size:22px;font-weight:800}
-h1 span{color:#c6a52d}
-.sub{margin-top:8px;font-size:11px;opacity:.6;line-height:1.4}
+body{background:#0a0a0a;color:#fff;font-family:system-ui;min-height:100vh}
+.wrap{width:92%;max-width:320px;margin:65px auto 0;text-align:center}
+h1{font-size:22px;font-weight:800} h1 span{color:#c6a52d}
+.sub{margin-top:8px;font-size:11px;opacity:.6}
 .box{margin-top:18px;background:#151515;border-radius:12px;padding:14px;border:1px solid #222}
 input{width:100%;background:transparent;border:none;text-align:center;font-size:18px;letter-spacing:8px;color:#fff;outline:none}
-.btn{margin-top:14px;width:100%;padding:11px;border-radius:12px;border:none;background:#1a5c2e;color:#7fb08d;font-weight:700;font-size:14px}
+.btn{margin-top:14px;width:100%;padding:11px;border-radius:12px;border:none;background:#1a5c2e;color:#7fb08d;font-weight:700}
 .btn.on{background:#16a34a;color:#fff}
+/* MOYO */
+#moyo{display:none;background:#0f0f0f;min-height:100vh}
+.head{background:#111;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;position:sticky;top:0}
+.body{padding:16px;max-width:900px;margin:0 auto}
+.roleTabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{flex:1;padding:10px;border-radius:10px;background:#1a1a1a;border:1px solid #222;text-align:center;font-size:12px;cursor:pointer}
+.tab.active{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:700}
+.card{background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:14px;margin-bottom:12px}
+.badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;margin-left:6px}
+.badge-admin{background:#16a34a} .badge-mlango{background:#2563eb} .badge-mteja{background:#444}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div id="login" class="wrap">
   <h1>Nialike <span>Go Tech</span></h1>
   <div class="sub">Ingiza PIN yako<br>Admin &nbsp; Msimamizi wa Mlango &nbsp; Mteja</div>
   <div class="box"><input id="pin" type="password" placeholder="••••" maxlength="12" autofocus></div>
   <button id="btn" class="btn">Ingia</button>
 </div>
-<script>
-// Zima sw ya zamani
-if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()))}
-// Zuia Hitilafu
-const _alert=window.alert; window.alert=function(m){ if(String(m).includes('Hitilafu')) return; return _alert.apply(this,arguments) }
 
-const PIN='Nialike2026';
-const pin=document.getElementById('pin'), btn=document.getElementById('btn');
-pin.addEventListener('input',()=>{ if(pin.value) btn.classList.add('on'); else btn.classList.remove('on') });
+<div id="moyo">
+  <div class="head">
+    <div><b>Moyo wa Site</b> <small id="roleLabel" style="opacity:.6">- Admin</small></div>
+    <button onclick="logout()" style="background:#222;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:12px">Toka</button>
+  </div>
+  <div class="body">
+    <div class="roleTabs">
+      <div class="tab active" id="tab-admin" onclick="setRole('admin')">Admin</div>
+      <div class="tab" id="tab-mlango" onclick="setRole('mlango')">Msimamizi wa Mlango</div>
+      <div class="tab" id="tab-mteja" onclick="setRole('mteja')">Mteja</div>
+    </div>
 
-function goAdmin(){
-  // Hizi ndizo moyo wa system unazitafuta
-  localStorage.setItem('ngt_tok','admin-ok');
-  localStorage.setItem('ngt_role','admin');
-  localStorage.setItem('nialike_role','admin');
-  localStorage.setItem('nialike_logged','true');
-  localStorage.setItem('isAdmin','true');
-  localStorage.setItem('admin','true');
-  sessionStorage.setItem('isAdmin','true');
-  // Sasa enda moyoni, sio home ya wateja
-  location.href='/#admin';
-}
-
-btn.onclick=()=>{
-  if(pin.value.trim()===PIN){ goAdmin(); }
-  else { pin.value=''; btn.classList.remove('on'); }
-};
-pin.addEventListener('keydown',e=>{ if(e.key==='Enter' && pin.value.trim()===PIN) goAdmin() });
-</script>
-</body>
-</html>
+    <!-- ADMIN VIEW -->
+    <div id="view-admin">
+      <div class="card"><h3>Admin <span class="badge badge-admin">FULL ACCESS</span></h3><p style="font-size:12px;opacity:.7;margin-top:6px">✔ Ongeza/Futa Bidhaa<br>✔ Badilisha Bei<br>✔ Ona Orders Zote<br>✔ Manage Wafanyakazi<br>✔ Futa Cache / Hitilafu</p><a href="/" style="display:block;margin-top:10px;background:#16a34a;color:#fff;text-align:center;padding:10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">Fungua Home kama Admin</a></div>
+    </div>
+    <!-- MLANGO VIEW
