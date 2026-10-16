@@ -4,7 +4,15 @@ function setLang(){
   L=L==='sw'?'en':'sw';
   document.documentElement.lang=L;
   document.getElementById('lg').textContent=L==='sw'?'EN':'SW';
-  document.querySelectorAll('[t]').forEach(e=>e.textContent=e.getAttribute('t').split('|')[L==='sw'?0:1]);
+ // FIX: Tambua admin kutoka portal
+if(localStorage.getItem('isAdmin')==='true' || localStorage.getItem('ngt_tok')==='admin-ok'){
+  localStorage.setItem('ngt_role','admin');
+  // Lazimisha kuonyesha dashboard ya admin, si ya mteja
+  if(location.hash==='#admin' || localStorage.getItem('isAdmin')){
+    // hapa code yako ya kuonyesha admin panel ipo
+    console.log('ADMIN MODE ACTIVE - Moyo wa system');
+  }
+} document.querySelectorAll('[t]').forEach(e=>e.textContent=e.getAttribute('t').split('|')[L==='sw'?0:1]);
 }
 document.querySelectorAll('[t]').forEach(e=>e.textContent=e.getAttribute('t').split('|')[0]);
 document.querySelectorAll('.pk').forEach(p=>p.onclick=()=>{document.querySelectorAll('.pk').forEach(x=>x.classList.remove('on'));p.classList.add('on')});
