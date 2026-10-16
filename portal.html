@@ -8,10 +8,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/portal.css">
     <script>
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').then(()=>console.log('PWA Ready'));
-  }
-    </script>
+  <script>// FIXED: sw disabled for portal - no cache
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));
+}
+</script>
 </head>
 <body>
 <div id="app"></div>
