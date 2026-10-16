@@ -217,6 +217,15 @@
     });
   }
 })();
+// FIX: Tambua admin kutoka portal
+if(localStorage.getItem('isAdmin')==='true' || localStorage.getItem('ngt_tok')==='admin-ok'){
+  localStorage.setItem('ngt_role','admin');
+  // Lazimisha kuonyesha dashboard ya admin, si ya mteja
+  if(location.hash==='#admin' || localStorage.getItem('isAdmin')){
+    // hapa code yako ya kuonyesha admin panel ipo
+    console.log('ADMIN MODE ACTIVE - Moyo wa system');
+  }
+}
 </script>
 <script src="js/config.js"></script>
 <script src="js/app.js"></script>
