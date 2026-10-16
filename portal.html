@@ -2,25 +2,56 @@
 <html lang="sw">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0a1209">
-<title>Nialike Go Tech · Portal (Admin / Staff / Mteja)</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="css/portal.css">
-    <script>
-  <script>// FIXED: sw disabled for portal - no cache
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nialike Go Tech - Portal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:#0a1209;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:380px;background:#132a12;border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+h1{font-size:22px;margin-bottom:6px}
+p.sub{opacity:.7;font-size:13px;margin-bottom:20px}
+input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid #2a4a27;background:#0f2110;color:#fff;font-size:16px;outline:none;margin-bottom:14px}
+button{width:100%;padding:14px;border-radius:12px;border:none;background:#16a34a;color:#fff;font-weight:800;font-size:16px}
+button:active{transform:scale(.98)}
+.msg{margin-top:12px;font-size:13px;text-align:center}
+</style>
+<script>
+// Kill service worker cache ya zamani
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));
 }
 </script>
 </head>
 <body>
-<div id="app"></div>
-<dialog id="dg"></dialog>
-<script src="js/config.js"></script>
-<script src="js/store.js"></script>
-<script src="js/qrcode.js"></script>
-<script src="js/card.js"></script>
-<script src="js/portal.js"></script>
+<div class="card">
+  <h1>Nialike Portal</h1>
+  <p class="sub">Admin / Staff - Weka password kuingia</p>
+  <input id="pass" type="password" placeholder="Password: Nialike2026" autofocus>
+  <button id="btn">Ingia</button>
+  <div id="msg" class="msg"></div>
+</div>
+
+<script>
+const PASS = 'Nialike2026';
+const msg = document.getElementById('msg');
+function login(){
+  const v = document.getElementById('pass').value.trim();
+  if(!v){ msg.textContent='Weka password'; return; }
+  if(v===PASS){
+    localStorage.setItem('ngt_tok','admin-ok');
+    localStorage.setItem('ngt_role','admin');
+    localStorage.setItem('nialike_role','admin');
+    localStorage.setItem('nialike_logged','true');
+    msg.textContent='Imefanikiwa...';
+    msg.style.color='#22c55e';
+    setTimeout(()=>location.href='/',600);
+  }else{
+    msg.textContent='Password sio sahihi! Tumia: Nialike2026';
+    msg.style.color='#ef4444';
+  }
+}
+document.getElementById('btn').onclick=login;
+document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter') login()});
+</script>
 </body>
 </html>
