@@ -8,47 +8,74 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0a0a0a;color:#fff;font-family:system-ui;min-height:100vh}
 .wrap{width:92%;max-width:320px;margin:65px auto 0;text-align:center}
-h1{font-size:22px;font-weight:800} h1 span{color:#c6a52d}
+h1{font-size:22px;font-weight:800}h1 span{color:#c6a52d}
 .sub{margin-top:8px;font-size:11px;opacity:.6}
 .box{margin-top:18px;background:#151515;border-radius:12px;padding:14px;border:1px solid #222}
 input{width:100%;background:transparent;border:none;text-align:center;font-size:18px;letter-spacing:8px;color:#fff;outline:none}
-.btn{margin-top:14px;width:100%;padding:11px;border-radius:12px;border:none;background:#1a5c2e;color:#7fb08d;font-weight:700}
-.btn.on{background:#16a34a;color:#fff}
-/* MOYO */
+.btn{margin-top:14px;width:100%;padding:11px;border-radius:12px;border:none;background:#16a34a;color:#fff;font-weight:700}
 #moyo{display:none;background:#0f0f0f;min-height:100vh}
-.head{background:#111;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222;position:sticky;top:0}
+.head{background:#111;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #222}
 .body{padding:16px;max-width:900px;margin:0 auto}
 .roleTabs{display:flex;gap:8px;margin-bottom:14px}
-.tab{flex:1;padding:10px;border-radius:10px;background:#1a1a1a;border:1px solid #222;text-align:center;font-size:12px;cursor:pointer}
+.tab{flex:1;padding:10px;border-radius:10px;background:#1a1a1a;border:1px solid #222;text-align:center;font-size:12px}
 .tab.active{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:700}
 .card{background:#1a1a1a;border:1px solid #222;border-radius:12px;padding:14px;margin-bottom:12px}
-.badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;margin-left:6px}
-.badge-admin{background:#16a34a} .badge-mlango{background:#2563eb} .badge-mteja{background:#444}
 </style>
 </head>
 <body>
-
 <div id="login" class="wrap">
-  <h1>Nialike <span>Go Tech</span></h1>
-  <div class="sub">Ingiza PIN yako<br>Admin &nbsp; Msimamizi wa Mlango &nbsp; Mteja</div>
-  <div class="box"><input id="pin" type="password" placeholder="••••" maxlength="12" autofocus></div>
-  <button id="btn" class="btn">Ingia</button>
+<h1>Nialike <span>Go Tech</span></h1>
+<div class="sub">Ingiza PIN yako<br>Admin Msimamizi wa Mlango Mteja</div>
+<div class="box">
+<input id="pin" type="password" placeholder="...." maxlength="12">
 </div>
-
+<button id="btn" class="btn">Ingia</button>
+</div>
 <div id="moyo">
-  <div class="head">
-    <div><b>Moyo wa Site</b> <small id="roleLabel" style="opacity:.6">- Admin</small></div>
-    <button onclick="logout()" style="background:#222;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:12px">Toka</button>
-  </div>
-  <div class="body">
-    <div class="roleTabs">
-      <div class="tab active" id="tab-admin" onclick="setRole('admin')">Admin</div>
-      <div class="tab" id="tab-mlango" onclick="setRole('mlango')">Msimamizi wa Mlango</div>
-      <div class="tab" id="tab-mteja" onclick="setRole('mteja')">Mteja</div>
-    </div>
-
-    <!-- ADMIN VIEW -->
-    <div id="view-admin">
-      <div class="card"><h3>Admin <span class="badge badge-admin">FULL ACCESS</span></h3><p style="font-size:12px;opacity:.7;margin-top:6px">✔ Ongeza/Futa Bidhaa<br>✔ Badilisha Bei<br>✔ Ona Orders Zote<br>✔ Manage Wafanyakazi<br>✔ Futa Cache / Hitilafu</p><a href="/" style="display:block;margin-top:10px;background:#16a34a;color:#fff;text-align:center;padding:10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">Fungua Home kama Admin</a></div>
-    </div>
-    <!-- MLANGO VIEW
+<div class="head">
+<div><b>Moyo wa Site</b> <small id="roleLabel">- Admin</small></div>
+<button onclick="logout()" style="background:#222;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:12px">Toka</button>
+</div>
+<div class="body">
+<div class="roleTabs">
+<div class="tab active" id="tab-admin" onclick="setRole('admin')">Admin</div>
+<div class="tab" id="tab-mlango" onclick="setRole('mlango')">Msimamizi</div>
+<div class="tab" id="tab-mteja" onclick="setRole('mteja')">Mteja</div>
+</div>
+<div id="view-admin"><div class="card"><h3>Admin FULL ACCESS</h3><p style="font-size:12px;opacity:.7;margin-top:6px">Ongeza/Futa Bidhaa<br>Badilisha Bei<br>Ona Orders Zote<br>Manage Wafanyakazi<br>Futa Cache</p><a href="/" style="display:block;margin-top:10px;background:#16a34a;color:#fff;text-align:center;padding:10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700">Fungua Home kama Admin</a></div></div>
+<div id="view-mlango" style="display:none"><div class="card"><h3>Msimamizi wa Mlango</h3><p style="font-size:12px;opacity:.7">Check Wateja<br>Thibitisha Orders<br>Stock Read Only</p></div></div>
+<div id="view-mteja" style="display:none"><div class="card"><h3>Mteja</h3><p style="font-size:12px;opacity:.7">Anaona Home tu<br>Anaweza Ku-order</p><a href="/" style="display:block;margin-top:10px;background:#222;color:#fff;text-align:center;padding:10px;border-radius:8px;text-decoration:none">Nenda Home</a></div></div>
+</div>
+</div>
+<script>
+const PIN='Nialike2026';
+var pin=document.getElementById('pin');
+var btn=document.getElementById('btn');
+var login=document.getElementById('login');
+var moyo=document.getElementById('moyo');
+function enterMoyo(){
+localStorage.setItem('ngt_tok','admin-ok');
+localStorage.setItem('ngt_role','admin');
+localStorage.setItem('isAdmin','true');
+sessionStorage.setItem('isAdmin','true');
+login.style.display='none';
+moyo.style.display='block';
+}
+if(localStorage.getItem('isAdmin')==='true'){enterMoyo();}
+btn.onclick=function(){
+if(pin.value.trim()===PIN){enterMoyo();}else{alert('PIN sio sahihi: Nialike2026');pin.value='';}
+};
+pin.onkeydown=function(e){if(e.key==='Enter'){btn.onclick();}};
+function setRole(r){
+document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+document.getElementById('view-admin').style.display='none';
+document.getElementById('view-mlango').style.display='none';
+document.getElementById('view-mteja').style.display='none';
+if(r==='admin'){document.getElementById('tab-admin').classList.add('active');document.getElementById('view-admin').style.display='block';document.getElementById('roleLabel').innerText='- Admin';}
+if(r==='mlango'){document.getElementById('tab-mlango').classList.add('active');document.getElementById('view-mlango').style.display='block';document.getElementById('roleLabel').innerText='- Msimamizi';}
+if(r==='mteja'){document.getElementById('tab-mteja').classList.add('active');document.getElementById('view-mteja').style.display='block';document.getElementById('roleLabel').innerText='- Mteja';}
+}
+function logout(){localStorage.clear();sessionStorage.clear();location.reload();}
+</script>
+</body>
+</html>
