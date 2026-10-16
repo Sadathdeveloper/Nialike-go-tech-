@@ -6,72 +6,52 @@
 <title>Nialike Go Tech</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:#0a0a0a;color:#fff;font-family:system-ui;display:flex;align-items:center;justify-content:center;padding:20px}
-.wrap{width:100%;max-width:380px;text-align:center}
-h1{font-size:28px;font-weight:800;letter-spacing:.5px}
-h1 span{color:#a68a2d}
-.sub{margin-top:10px;font-size:13px;opacity:.7}
-.sub small{margin:0 6px}
-.box{margin-top:24px;background:#161616;border-radius:14px;padding:18px}
-input{width:100%;background:transparent;border:none;text-align:center;font-size:22px;letter-spacing:8px;color:#fff;outline:none;padding:10px}
-input::placeholder{color:#555;letter-spacing:6px}
-.btn{margin-top:16px;width:100%;padding:14px;border-radius:12px;border:none;background:#14532d;color:#8ab89a;font-weight:700;font-size:16px}
-.btn.active{background:#16a34a;color:#fff}
+body{background:#0a0a0a;color:#fff;font-family:system-ui;display:flex;justify-content:center;padding-top:70px;min-height:100vh}
+.wrap{width:92%;max-width:320px;text-align:center}
+h1{font-size:22px;font-weight:800}
+h1 span{color:#c6a52d}
+.sub{margin-top:8px;font-size:11px;opacity:.6;line-height:1.4}
+.box{margin-top:18px;background:#151515;border-radius:12px;padding:14px;border:1px solid #222}
+input{width:100%;background:transparent;border:none;text-align:center;font-size:18px;letter-spacing:8px;color:#fff;outline:none}
+.btn{margin-top:14px;width:100%;padding:11px;border-radius:12px;border:none;background:#1a5c2e;color:#7fb08d;font-weight:700;font-size:14px}
+.btn.on{background:#16a34a;color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Nialike <span>Go Tech</span></h1>
-  <div class="sub">Ingiza PIN yako<br><small>Admin</small> <small>Msimamizi wa Mlango</small> <small>Mteja</small></div>
-  <div class="box">
-    <input id="pin" type="password" placeholder="••••" maxlength="12" autofocus>
-  </div>
-  <button id="ingia" class="btn">Ingia</button>
+  <div class="sub">Ingiza PIN yako<br>Admin &nbsp; Msimamizi wa Mlango &nbsp; Mteja</div>
+  <div class="box"><input id="pin" type="password" placeholder="••••" maxlength="12" autofocus></div>
+  <button id="btn" class="btn">Ingia</button>
 </div>
-
 <script>
-// 1. Zima service worker ya zamani inaleta cache
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()));
-}
-// 2. Zuia alert ya Hitilafu isitokee tena
-window.alert = function(m){ if(String(m).includes('Hitilafu')) return; };
+// Zima sw ya zamani
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(x=>x.unregister()))}
+// Zuia Hitilafu
+const _alert=window.alert; window.alert=function(m){ if(String(m).includes('Hitilafu')) return; return _alert.apply(this,arguments) }
 
-const PIN_CORRECT = 'Nialike2026';
-const pinEl = document.getElementById('pin');
-const btn = document.getElementById('ingia');
+const PIN='Nialike2026';
+const pin=document.getElementById('pin'), btn=document.getElementById('btn');
+pin.addEventListener('input',()=>{ if(pin.value) btn.classList.add('on'); else btn.classList.remove('on') });
 
-function updateBtn(){
-  if(pinEl.value.trim().length>0) btn.classList.add('active');
-  else btn.classList.remove('active');
-}
-pinEl.addEventListener('input', updateBtn);
-
-function login(){
-  const v = pinEl.value.trim();
-  if(!v) return;
-  if(v===PIN_CORRECT){
-    // Weka alama zote za admin ili moyo wa site utambue
-    localStorage.setItem('ngt_tok','admin-ok');
-    localStorage.setItem('ngt_role','admin');
-    localStorage.setItem('nialike_role','admin');
-    localStorage.setItem('nialike_logged','true');
-    localStorage.setItem('isAdmin','true');
-    localStorage.setItem('admin','true');
-    sessionStorage.setItem('isAdmin','true');
-    // Ingia kwenye moyo - index.html itaona admin
-    location.href = '/#admin';
-  }else{
-    // Usi-onyeshe Hitilafu, onyesha tu vibration
-    pinEl.style.border='1px solid #ef4444';
-    setTimeout(()=>pinEl.style.border='none',800);
-    pinEl.value='';
-    updateBtn();
-  }
+function goAdmin(){
+  // Hizi ndizo moyo wa system unazitafuta
+  localStorage.setItem('ngt_tok','admin-ok');
+  localStorage.setItem('ngt_role','admin');
+  localStorage.setItem('nialike_role','admin');
+  localStorage.setItem('nialike_logged','true');
+  localStorage.setItem('isAdmin','true');
+  localStorage.setItem('admin','true');
+  sessionStorage.setItem('isAdmin','true');
+  // Sasa enda moyoni, sio home ya wateja
+  location.href='/#admin';
 }
 
-btn.onclick = login;
-pinEl.addEventListener('keydown', e=>{ if(e.key==='Enter') login() });
+btn.onclick=()=>{
+  if(pin.value.trim()===PIN){ goAdmin(); }
+  else { pin.value=''; btn.classList.remove('on'); }
+};
+pin.addEventListener('keydown',e=>{ if(e.key==='Enter' && pin.value.trim()===PIN) goAdmin() });
 </script>
 </body>
 </html>
