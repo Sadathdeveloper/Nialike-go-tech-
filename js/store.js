@@ -1,82 +1,71 @@
-/* API client - FIXED: Hakuna Hitilafu tena, offline mode */
-const DB=(()=>{})();
-const API=(window.NGT_CONFIG&&window.NGT_CONFIG.API)||'',ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
-let tok=ls('ngt_tok')||'',me=null,d={events:[],guests:[],scans:[],users:[],orders:[],settings:{}};
+/* DATA LAYER - REAL Vercel KV + localStorage fallback */
+const DB=(()=>{
+const K='ngt_db', API='/api/db';
+const uid=p=>p+Math.random().toString(36).slice(2,8).toUpperCase();
+let d; 
+const blank=()=>({users:[],events:[],guests:[],scans:[],orders:[]});
+try{d=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!d)d=blank();
 
-async function call(m,p,b){
-  // FIX 1: Kama API ni tupu, usijaribu fetch - rudi offline moja kwa moja bila Hitilafu
-  if(!API || API===''){
-    console.log('[FIXED] API empty, offline mode - no Hitilafu');
-    return {ok:true, offline:true, token:'admin-ok', user:{role:'admin', name:'Admin'}};
+// Load from REAL server on start
+fetch(API).then(r=>r.json()).then(remote=>{
+  if(remote && remote.users){
+    d=remote;
+    try{localStorage.setItem(K,JSON.stringify(d))}catch(e){}
+    // auto reload portal if loaded
+    if(typeof render==='function') try{render()}catch(e){}
   }
-  let r;
+}).catch(()=>{});
+
+const save=()=>{
+  try{localStorage.setItem(K,JSON.stringify(d))}catch(e){}
   try{
-    r=await fetch(API+p,{method:m,headers:{'Content-Type':'application/json',...(tok?{Authorization:'Bearer '+tok}:{})},body:b?JSON.stringify(b):undefined});
-  }catch(e){
-    // FIX 2: Badala ya kutupa 'Hakuna mtandao', rudi offline bila error
-    console.log('[FIXED] Fetch failed, offline fallback');
-    return {ok:true, offline:true, token:tok||'admin-ok', user:me||{role:'admin'}};
-  }
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok){
-    // FIX 3: Badala ya kutupa 'Hitilafu', rudi offline
-    if(r.status===401 && tok && p!=='/api/login'){api.clear(); api.onAuthFail&&api.onAuthFail()}
-    console.log('[FIXED] API error '+r.status+', offline fallback, no Hitilafu');
-    return {ok:true, offline:true, error:j.error, status:r.status};
-  }
-  return j;
-}
+    fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(d)
+    });
+  }catch(e){}
+};
 
-const queue=()=>{try{return JSON.parse(ls('ngt_q')||'[]')}catch(e){return[]}};
+function addG(eid,name,phone,o={}){const g={id:uid('G'),eid,name,phone:U.phone(phone),table:o.table||'',status:'pending',code:uid('QR'),at:null,sent:false};d.guests.push(g);save();return g;}
+
 const api={
-  call,d,onAuthFail:null,get token(){return tok},get me(){return me},
-  clear(){tok='';me=null;ls('ngt_tok',null)},
-  async needsSetup(){try{return (await call('GET','/api/setup')).needsSetup}catch(e){return false}},
-  async auth(path,b){
-    // FIX: Login ya local bila API
-    if(!API){
-      tok='admin-ok';ls('ngt_tok',tok);me={role:'admin', name:b.name||'Admin'};return me;
-    }
-    const r=await call('POST',path,b);tok=r.token;ls('ngt_tok',tok);me=r.user;return me;
-  },
-  setup:(name,pin)=>api.auth('/api/setup',{name,pin}),
-  login:pin=>{
-    // FIX: Password check ya local
-    const correct = (window.NGT_CONFIG&&window.NGT_CONFIG.ADMIN_PASS)||'Nialike2026';
-    if(pin===correct || pin.pin===correct || pin=== 'Nialike2026' || pin.pin==='Nialike2026'){
-      tok='admin-ok';ls('ngt_tok',tok);me={role:'admin'};return Promise.resolve(me);
-    }
-    return api.auth('/api/login',{pin});
-  },
-  async restore(){if(!tok)return null;try{me=(await call('GET','/api/me')).user;return me}catch(e){return {role:'admin'}}},
-  async load(eid){try{const s=await call('GET','/api/state'+(eid?'?eid='+eid:''));return s}catch(e){return d}},
-  ev:id=>d.events.find(e=>e.id===id),
-  eventsOf:()=>d.events, guests:eid=>d.guests.filter(g=>g.eid===eid),
-  stats(eid){const e=api.ev(eid);return e&&e.s?e.s:{total:0,in:0,pending:0,pct:0,bad:0}},
-  addEvent:o=>call('POST','/api/events',o), updEvent:(id,o)=>call('PUT','/api/events/'+id,o), delEvent:id=>call('DELETE','/api/events/'+id),
-  addGuest:(eid,o)=>call('POST','/api/events/'+eid+'/guests',o), importText:(eid,text)=>call('POST','/api/events/'+eid+'/import',{text}),
-  delGuest:id=>call('DELETE','/api/guests/'+id), markSent:id=>call('POST','/api/guests/'+id+'/sent',{}),
-  newUser:o=>call('POST','/api/users',o), resetPin:id=>call('POST','/api/users/'+id+'/reset-pin',{}), setUser:(id,o)=>call('PUT','/api/users/'+id,o), delUser:id=>call('DELETE','/api/users/'+id),
-  myPin:pin=>call('POST','/api/me/pin',{pin}), patchOrder:(id,o)=>call('PATCH','/api/orders/'+id,o), backup:()=>call('GET','/api/backup'),
-  walkin:(eid,name,phone)=>call('POST','/api/events/'+eid+'/walkin',{name,phone}),
-  queued:()=>queue().length,
-  async scan(eid,x){
-    try{const r=await call('POST','/api/scan',{eid,...x,device:'web'});if(r.stats){const e=api.ev(eid);if(e)e.s=r.stats}if(r.guest&&r.res==='ok'){const g=d.guests.find(y=>y.id===r.guest.id);if(g){g.status='in';g.at=r.guest.at}}return r}
-    catch(e){
-      const c=String(x.code||'').toUpperCase(),g=d.guests.find(y=>x.gid?y.id===x.gid:(y.code===c||(y.short===c&&y.eid===eid)));
-      if(!g||g.eid!==eid)return{res:'invalid',guest:null,offline:true};
-      if(g.status==='in')return{res:'dup',guest:{name:g.name,table:g.table,gate:g.gate,at:g.at},offline:true};
-      g.status='in';g.at=Date.now();const e2=api.ev(eid);if(e2&&e2.s){e2.s.in++;e2.s.pending--;e2.s.pct=Math.round(e2.s.in/Math.max(1,e2.s.total)*100)}
-      const q=queue();q.push({eid,gid:g.id,at:g.at});ls('ngt_q',JSON.stringify(q));
-      return{res:'ok',guest:{name:g.name,table:g.table,gate:g.gate,at:g.at},offline:true}
-    }
-  },
-  async flush(){const q=queue();if(!q.length||!tok)return 0;try{await call('POST','/api/scan/batch',{items:q});ls('ngt_q',null);return q.length}catch(e){return 0}}
+get(){return d},
+get d(){return d},
+user:id=>d.users.find(u=>u.id===id),
+login:pin=>d.users.find(u=>u.pin===String(pin)),
+ev:id=>d.events.find(e=>e.id===id),
+eventsOf:u=>u.role==='admin'?d.events:d.events.filter(ev=>u.events.includes(ev.id)),
+guests:eid=>d.guests.filter(g=>g.eid===eid),
+addEvent(o){const e={id:uid('EV'),...o};d.events.push(e);save();return e;},
+addGuest:(eid,n,p,o)=>addG(eid,n,p,o),
+delGuest(id){d.guests=d.guests.filter(g=>g.id!==id);save()},
+importText(eid,txt){let n=0;txt.split(/\r?\n/).forEach(line=>{line=line.trim();if(!line)return;const parts=line.split(',');const name=parts[0]?.trim();if(!name)return;addG(eid,name,parts[1]||'',{table:parts[2]||''});n++});return n;},
+addUser(o){const u={id:uid('U'),events:[],...o};d.users.push(u);save();return u;},
+delUser(id){d.users=d.users.filter(u=>u.id!==id);save()},
+scan(code,by,allowed){
+  const g=d.guests.find(x=>x.code===code||x.id===code);
+  let res='invalid'; let r={id:uid('S'),code,by,at:Date.now(),res:'',eid:null,gid:null};
+  if(!g)res='invalid';else if(!allowed.includes(g.eid))res='other';else if(g.status==='in')res='dup';else{res='ok';g.status='in';g.at=r.at;}
+  r.eid=g?.eid||null;r.gid=g?.id||null;r.res=res;d.scans.push(r);save();return{res,g};
+},
+manual(gid,by,allowed){const g=d.guests.find(x=>x.id===gid);if(!g)return{res:'invalid'};return api.scan(g.code,by,allowed)},
+stats(eid){const g=api.guests(eid),i=g.filter(x=>x.status==='in');return{total:g.length,in:i.length,pending:g.length-i.length,bad:0,pct:g.length?Math.round(i.length/g.length*100):0}},
+addOrder(o){d.orders.unshift({id:uid('NGT-'),at:Date.now(),status:'new',...o});save()},
+setOrder(id,st){const o=d.orders.find(x=>x.id===id);if(o){o.status=st;save()}},
+exportPack(eid){const E=eid?d.events.filter(e=>e.id===eid):d.events;return{v:1,at:Date.now(),events:E,guests:d.guests.filter(g=>eid?g.eid===eid:true),scans:d.scans.filter(s=>eid?s.eid===eid:true),users:d.users}},
+importPack(p){if(!p||p.v!==1)throw new Error('Pack si sahihi');let c={e:0,g:0,s:0,u:0};p.events.forEach(e=>{if(!api.ev(e.id)){d.events.push(e);c.e++}});p.guests.forEach(g=>{if(!d.guests.find(x=>x.id===g.id)){d.guests.push(g);c.g++}});p.scans.forEach(s=>{if(!d.scans.some(x=>x.id===s.id)){d.scans.push(s);c.s++}});(p.users||[]).forEach(u=>{if(!api.user(u.id)){d.users.push(u);c.u++}});save();return c;},
+reset(){d=blank();save()},
+markSent(id){const g=d.guests.find(x=>x.id===id);if(g){g.sent=true;save()}}
 };
+return api})();
+
 const U={
-  dl(name,text,type='application/json'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()},
-  csv:rows=>'\ufeff'+rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n'),
-  phone(p){p=String(p).replace(/[\s-+]/g,'');return p.startsWith('0')?'255'+p.slice(1):p},
-  inviteUrl(g){return new URL('invite.html?c='+encodeURIComponent(g.code),location.href).href}
+dl(name,text,type='application/json'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()},
+csv:rows=>'\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n'),
+phone:(p)=>String(p).replace(/[\s\-\+]/g,''),
+b64:o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))),
+unb64:s=>JSON.parse(decodeURIComponent(escape(atob(s)))),
+inviteUrl(g,e){const u=new URL('invite.html',location.href);u.searchParams.set('g',g.id);u.searchParams.set('e',e.id);return u.toString()}
 };
-window.api=api; window.U=U;
