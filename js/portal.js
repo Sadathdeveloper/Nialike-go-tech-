@@ -350,10 +350,19 @@ const A={
     DB.addEvent({name:val('n_name'),type:val('n_type'),date:val('n_date'),time:val('n_time'),venue:val('n_venue'),pkg:val('n_pkg'),card:'assets/cards/card'+val('n_card')+'.jpg'});
     render();
   },
-  newuser(){
-    if(!val('u_name')||val('u_pin').length<4)return alert('Jina na PIN (tarakimu 4+) vinahitajika.');
-    if(DB.d.users.some(u=>u.pin===val('u_pin')))return alert('PIN tayari inatumika. Chagua PIN nyingine.');
-    DB.addUser({name:val('u_name'),role:val('u_role'),pin:val('u_pin'),events:[...document.querySelectorAll('.u_ev:checked')].map(x=>x.value)});
+   newuser(){
+    let name=val('u_name').trim();
+    let pin=val('u_pin').trim();
+    if(!name) return alert('Jina linahitajika');
+    if(!pin){
+      pin=String(Math.floor(1000+Math.random()*9000));
+    }
+    if(pin.length<4) return alert('PIN angalau 4');
+    if(DB.d.users.some(u=>u.pin===pin)){
+      pin=String(Math.floor(1000+Math.random()*9000));
+    }
+    const u=DB.addUser({name,role:val('u_role'),pin,events:[...document.querySelectorAll('.u_ev:checked')].map(x=>x.value)});
+    alert('✅ Ametengenezwa!\n\nJina: '+u.name+'\nPIN yake: '+u.pin+'\nRole: '+u.role+'\n\nMtumie PIN hii!');
     render();
   },
   deluser:d=>{if(confirm('Futa mtumiaji huyu?')){DB.delUser(d.id);render()}},
