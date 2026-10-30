@@ -31,8 +31,9 @@ const save=()=>{
 function addG(eid,name,phone,o={}){const g={id:uid('G'),eid,name,phone:U.phone(phone),table:o.table||'',status:'pending',code:uid('QR'),at:null,sent:false};d.guests.push(g);save();return g;}
 
 const api={
-get(){return d},
 get d(){return d},
+load(){return d},
+loadRemote(){return Promise.resolve(d)},
 user:id=>d.users.find(u=>u.id===id),
 login:pin=>d.users.find(u=>u.pin===String(pin)),
 ev:id=>d.events.find(e=>e.id===id),
