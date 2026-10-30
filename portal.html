@@ -7,12 +7,16 @@
 <link rel="stylesheet" href="css/portal.css"/>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">Inapakia...</div>
 <dialog id="dg"></dialog>
+
 <script src="js/config.js"></script>
 <script src="js/store.js"></script>
-<script src="js/qrcode.js"></script>
-<script src="js/card.js"></script>
+<script>
+// kuzuia crash kama card.js haipo
+window.cardPng = window.cardPng || (async()=>{throw new Error('card')});
+window.U = window.U || { phone:p=>String(p).replace(/\s/g,''), dl:()=>{}, csv:()=>{}, inviteUrl:()=>'#', b64:btoa, unb64:JSON.parse };
+</script>
 <script src="js/portal.js"></script>
 </body>
 </html>
