@@ -13,6 +13,10 @@ function stop(){clearInterval(timer);if(stream){stream.getTracks().forEach(t=>t.
 function render(){
   stop();const a=$('#app');
   if(!DB.d.users.some(u=>u.role==='admin')){
+    if(!location.search.includes('master=NIALIKE2024')){
+      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div><p class="m" style="color:#f87171">⛔ System imefungwa. Wasiliana na Admin mkuu.</p></div>`;
+      return;
+    }
     a.innerHTML=`<div class="login">
       <div class="logo-lg">Nialike <i>Go Tech</i></div>
       <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
