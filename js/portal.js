@@ -139,7 +139,8 @@ function vOrders(){
 
 /* ─── SYNC ─── */
 function vSync(){
-  return `<h2>Sync – Kuhamisha Data</h2>
+  if(S.u?.role==='client') return '';
+  return `<h2>Sync - Kuhamisha Data</h2>
   <p class="m" style="margin-bottom:14px">Data iko kwenye kifaa hiki tu. Hamisha kati ya vifaa kwa faili la JSON.</p>
   <div class="c">
     <h3>Tuma data (admin → msimamizi)</h3>
