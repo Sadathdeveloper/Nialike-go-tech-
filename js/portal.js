@@ -145,7 +145,7 @@ function vSync(){
   <div class="c">
     <h3>Tuma data (admin → msimamizi)</h3>
     <p class="m">Admin anatuma "pack" ya tukio kwa msimamizi wa mlango – ina wageni na QR codes.</p>
-    ${S.eid?`<button class="b" data-a="expev">⬇ Pack ya Tukio Hili</button>`:''}
+    ${S.u?.role!=='client'?`<button class="b o" data-a="expev">↓ Pack (Sync)</button>`:''}
     <button class="b o" data-a="expall" style="margin-top:8px">⬇ Data Yote</button>
   </div>
   <div class="c">
