@@ -151,7 +151,7 @@ function vSync(){
   <div class="c">
     <h3>Pokea data (msimamizi → admin)</h3>
     <p class="m">Msimamizi anatuma scans zake kwa admin baada ya tukio.</p>
-    <label class="b o" style="cursor:pointer;display:inline-block">⬆ Ingiza Faili la JSON<input type="file" accept=".json" hidden data-a="impfile"></label>
+   ${S.u?.role!=='client'?`<label class="b o" style="cursor:pointer">↑ Ingiza Pack<input type="file" accept=".json" hidden data-a="impfile"></label>`:''}
   </div>
   ${S.u?.role==='admin'?`<div class="c" style="border-color:rgba(239,68,68,.3)">
     <h3 style="color:#f87171">Hatari: Futa Data</h3>
