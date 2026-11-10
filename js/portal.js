@@ -1,3 +1,18 @@
+// === HATUA 2: Mgeni akibonyeza Nitakuwepo / Siwezi ===
+const params = new URLSearchParams(location.search);
+if(params.get('rsvp')){
+  const evId = params.get('ev');
+  const gId = params.get('g');
+  const ans = params.get('rsvp');
+  const ev = S.events.find(e=>e.id===evId);
+  const g = ev?.guests.find(x=>x.id===gId);
+  if(g){
+    g.status = ans==='yes' ? 'amethibitisha' : 'hatakuwepo';
+    save();
+    document.body.innerHTML = `<div style="text-align:center;padding:40px"><h1>${ans==='yes' ? '✅ Asante!' : '😔 Pole!'}</h1><p>${g.name}, tumepokea jibu lako.</p></div>`;
+    throw new Error('rsvp done');
+  }
+
 /* PORTAL v2 – Admin / Staff (QR Scanner) / Client – localStorage only */
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CARDS=['Blush Floral QR','Lace & Ribbon','Golden Rose','Ivory & Emerald','Emerald Heritage','Forest Duo','Crimson Romance'];
