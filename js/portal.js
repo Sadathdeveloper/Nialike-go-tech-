@@ -466,3 +466,16 @@ document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;c
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='pin')A.login();if(e.key==='Enter'&&e.target.id==='code')A.code()});
 $('#dg').addEventListener('close',()=>{if(S.u&&S.eid&&S.u.role==='admin')try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows()}catch(e){}});
 render();
+// === RSVP YA MGENI - Weka mwishoni mwa faili ===
+setTimeout(()=>{
+  try{
+    const params = new URLSearchParams(location.search);
+    if(!params.get('rsvp')) return;
+    const ev = S.events.find(e=>e.id===params.get('ev'));
+    const g = ev?.guests.find(x=>x.id===params.get('g'));
+    if(!g) return;
+    g.status = params.get('rsvp')==='yes' ? 'amethibitisha' : 'hatakuwepo';
+    save();
+    document.body.innerHTML = `<div style="text-align:center;padding:40px;color:#fff;background:#111;min-height:100vh"><h1>${params.get('rsvp')==='yes' ? '✅ Asante!' : '😔 Pole!'}</h1><p>${g.name}, tumepokea jibu lako.</p></div>`;
+  }catch(e){ console.log(e); }
+}, 500);
