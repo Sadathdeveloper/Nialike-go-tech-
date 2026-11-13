@@ -308,7 +308,11 @@ const dlg=h=>{
 };
 const gst=id=>DB.d.guests.find(g=>g.id===id);
 const dlimg=async(g,e)=>{const b=await cardPng(g,e);return{b,u:URL.createObjectURL(b),f:g.name.replace(/\W+/g,'_')+'.png'}};
-const msg=(g,e)=>`Habari ${g.name},\n\nUmealikwa kwenye: *${e.name}*\n📅 ${e.date} saa ${e.time}\n📍 ${e.venue}\n\n🎫 Fungua mwaliko wako na QR ya kuingia:\n${U.inviteUrl(g,e)}\n\nTunaomba uwe muda mzuri.\n– Nialike Go Tech`;
+const msg=(g,e)=>{
+  const base = location.origin + location.pathname;
+  const linkYes = `${base}?rsvp=yes&ev=${e.id}&g=${g.id}`;
+  const linkNo = `${base}?rsvp=no&ev=${e.id}&g=${g.id}`;
+  return `Habari ${g.name},\n\nUmealikwa kwenye: *${e.name}*\n📅 ${e.date} saa ${e.time}\n📍 ${e.venue}\n\n🎫 Fungua mwaliko wako na QR ya kuingia:\n${U.inviteUrl(g,e)}\n\nUta hudhuria?\n✅ Nitakuwepo: ${linkYes}\n❌ Siwezi: ${linkNo}\n\nTunakukaribisha kwa furaha kubwa, uwepo wako utatufanya tukio liwe kamili.\n- Nialike Go Tech`;
 
 /* ─── WhatsApp QUEUE ─── */
 const Q={l:[],i:0};
