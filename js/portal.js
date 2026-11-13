@@ -313,6 +313,7 @@ const msg=(g,e)=>{
   const linkYes = `${base}?rsvp=yes&ev=${e.id}&g=${g.id}`;
   const linkNo = `${base}?rsvp=no&ev=${e.id}&g=${g.id}`;
   return `Habari ${g.name},\n\nUmealikwa kwenye: *${e.name}*\n📅 ${e.date} saa ${e.time}\n📍 ${e.venue}\n\n🎫 Fungua mwaliko wako na QR ya kuingia:\n${U.inviteUrl(g,e)}\n\nUta hudhuria?\n✅ Nitakuwepo: ${linkYes}\n❌ Siwezi: ${linkNo}\n\nTunakukaribisha kwa furaha kubwa, uwepo wako utatufanya tukio liwe kamili.\n- Nialike Go Tech`;
+};
 
 /* ─── WhatsApp QUEUE ─── */
 const Q={l:[],i:0};
