@@ -484,3 +484,71 @@ setTimeout(()=>{
     document.body.innerHTML = `<div style="text-align:center;padding:40px;color:#fff;background:#111;min-height:100vh"><h1>${params.get('rsvp')==='yes' ? '✅ Asante!' : '😔 Pole!'}</h1><p>${g.name}, tumepokea jibu lako.</p></div>`;
   }catch(e){ console.log(e); }
 }, 500);
+// === FIX: TUMA KADI + UJUMBE - System ina-attach yenyewe ===
+async function canvasToFile(canvas, jina){
+  const blob = await new Promise(r=>canvas.toBlob(r,'image/png'));
+  return new File([blob], jina, {type:'image/png'});
+}
+async function shareFileUjumbe(file, ujumbe, simu){
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file], text:ujumbe, title:'Nialike Go Tech'}); return true; }
+    catch(e){ return false; }
+  } else {
+    window.open(`https://wa.me/${simu}?text=${encodeURIComponent(ujumbe)}`, '_blank');
+    return false;
+  }
+}
+function tafutaMgeni(gId){
+  const ev = DB.ev(S.eid);
+  const g = ev.guests.find(x=>x.id===gId);
+  return {ev, g};
+}
+
+// BUTTON 1: MWALIKO - Kadi bila QR
+window.tumaMwaliko = async function(gId){
+  const {ev, g} = tafutaMgeni(gId);
+  if(!g) return alert("Mgeni hajapatikana");
+  const canvas = document.createElement('canvas');
+  canvas.width=800; canvas.height=1000;
+  const c = canvas.getContext('2d');
+  c.fillStyle="#1a1a2e"; c.fillRect(0,0,800,1000);
+  c.fillStyle="#FFD700"; c.fillRect(0,0,800,10); c.fillRect(0,990,800,10);
+  c.fillStyle="#fff"; c.textAlign="center";
+  c.font="bold 32px Arial"; c.fillText("UMEALIKWA",400,130);
+  c.font="bold 42px Arial"; c.fillStyle="#FFD700"; c.fillText(ev.name,400,220);
+  c.fillStyle="#fff"; c.font="26px Arial"; c.fillText("Mgeni Maalum:",400,330);
+  c.font="bold 42px Arial"; c.fillText(g.name,400,390);
+  c.font="26px Arial"; c.fillText("📅 "+ev.date+" | 🕐 "+ev.time,400,520);
+  c.fillText("📍 "+ev.venue,400,580);
+  c.fillText("Karibu Sana!",400,720);
+  const file = await canvasToFile(canvas, 'Mwaliko-'+g.name+'.png');
+  const ujumbe = `Habari ${g.name}\nTafadhali pokea mwaliko wa ${ev.name}\n📅 ${ev.date} | 🕐 ${ev.time}\n📍 ${ev.venue}\n\nJibu hapa:\n✅ Nitakuwepo\n❌ Siwezi\n\nKaribu Sana! - Nialike Go Tech`;
+  await shareFileUjumbe(file, ujumbe, g.p);
+};
+
+// BUTTON 2: AMELIPA - Kadi yenye QR
+window.tumaKadiYaQR = async function(gId){
+  const {ev, g} = tafutaMgeni(gId);
+  if(!g) return alert("Mgeni hajapatikana");
+  if(!confirm(g.name+" amelipa mchango? Tuma Kadi ya QR?")) return;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('NIALIKE-'+g.id+'-'+g.name)}`;
+  const qr = new Image(); qr.crossOrigin="anonymous"; qr.src=qrUrl;
+  qr.onload = async ()=>{
+    const canvas = document.createElement('canvas');
+    canvas.width=800; canvas.height=1100;
+    const c = canvas.getContext('2d');
+    c.fillStyle="#fff"; c.fillRect(0,0,800,1100);
+    c.fillStyle="#1a1a2e"; c.fillRect(0,0,800,10);
+    c.fillStyle="#1a1a2e"; c.textAlign="center";
+    c.font="bold 32px Arial"; c.fillText("KADI YA KUINGIA",400,80);
+    c.font="bold 38px Arial"; c.fillText(g.name,400,140);
+    c.font="24px Arial"; c.fillText(ev.name+" | "+ev.date,400,190);
+    c.drawImage(qr,250,230,300,300);
+    c.font="bold 28px Arial"; c.fillText("ONESHA HII GETINI",400,620);
+    c.font="22px Arial"; c.fillText("📍 "+ev.venue,400,680);
+    const file = await canvasToFile(canvas, 'QR-'+g.name+'.png');
+    const ujumbe = `Habari ${g.name}\nAsante! Malipo yamepokelewa ✅\nHii hapo juu ni Kadi yako ya kuingia yenye QR.\n📅 ${ev.date} | 📍 ${ev.venue}\nKuwa nayo siku ya tukio, utaionesha getini.\nKaribu Sana! - Nialike Go Tech`;
+    g.paid = true; if(typeof save==='function') save();
+    await shareFileUjumbe(file, ujumbe, g.p);
+  };
+};
