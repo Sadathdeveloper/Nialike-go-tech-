@@ -177,7 +177,7 @@ function rows(){
       ${g.sent?'<span class="tag in" style="font-size:.6rem">📨 imetumwa</span>':''}
       ${adm?`<div class="row" style="margin:0;gap:4px">
         <button class="b o s" data-a="card" data-id="${g.id}" title="Ona kadi">🎫</button>
-        <button class="b o s" data-a="wa" data-id="${g.id}" title="Tuma WhatsApp">💬</button>
+        <button class="b o s" onclick="tumaMwaliko('${g.id}')" title="Tuma Mwaliko">📩</button><button class="b o s" onclick="tumaKadiYaQR('${g.id}')" title="Amelipa - Tuma QR">✅</button>
         <button class="b r s" data-a="delg" data-id="${g.id}" title="Futa">✕</button>
       </div>`:''}
     </div>
