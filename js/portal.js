@@ -1,6 +1,4 @@
-
-
-/* PORTAL v2 – Admin / Staff (QR Scanner) / Client – localStorage only */
+/* PORTAL v2 – Admin / Staff (QR Scanner) / Client – localStorage only – ENVAITA STYLE */
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CARDS=['Blush Floral QR','Lace & Ribbon','Golden Rose','Ivory & Emerald','Emerald Heritage','Forest Duo','Crimson Romance'];
 const S={u:null,eid:null,tab:'events',q:''};let stream=null,timer=null,last='',lastAt=0;
@@ -81,6 +79,7 @@ function vEvents(){
     <div class="row"><input id="n_name" placeholder="Jina la tukio *"><input id="n_type" placeholder="Aina (Harusi, Send-Off, Birthday...)"></div>
     <div class="row"><input id="n_date" type="date"><input id="n_time" type="time"></div>
     <input id="n_venue" placeholder="Mahali / Venue *">
+    <input id="n_map" placeholder="Link ya Ramani (Google Maps) - mfano https://maps.app.goo.gl/...">
     <div class="row">
       <select id="n_pkg"><option>Basic</option><option selected>Standard</option><option>Premium</option></select>
       <select id="n_card">${CARDS.map((c,i)=>`<option value="${i+1}">${c}</option>`).join('')}</select>
@@ -108,7 +107,7 @@ function vUsers(){
   </div>`;
 }
 
-/* ─── ADMIN: MAAGIZO (Orders from website) ─── */
+/* ─── ADMIN: MAAGIZO ─── */
 function vOrders(){
   const orders=DB.d.orders;
   const badge=s=>s==='done'?'<span class="tag in">✓ Imefanywa</span>':s==='cancelled'?'<span class="tag bad">Imekataliwa</span>':'<span class="tag new">🔔 Mpya</span>';
@@ -162,7 +161,7 @@ function vSync(){
   </div>`:''}`;
 }
 
-/* ─── EVENT VIEW (Admin/Client) ─── */
+/* ─── EVENT VIEW ─── */
 function rows(){
   const q=S.q.toLowerCase(),adm=S.u.role==='admin';
   const filtered=DB.guests(S.eid).filter(g=>(g.name+g.phone+g.table).toLowerCase().includes(q));
@@ -308,11 +307,14 @@ const dlg=h=>{
 };
 const gst=id=>DB.d.guests.find(g=>g.id===id);
 const dlimg=async(g,e)=>{const b=await cardPng(g,e);return{b,u:URL.createObjectURL(b),f:g.name.replace(/\W+/g,'_')+'.png'}};
+
+/* ─── ENVAITA STYLE MESSAGES – Hakuna RSVP links ─── */
 const msg=(g,e)=>{
-  const base = location.origin + location.pathname;
-  const linkYes = `${base}?rsvp=yes&ev=${e.id}&g=${g.id}`;
-  const linkNo = `${base}?rsvp=no&ev=${e.id}&g=${g.id}`;
-  return `Habari ${g.name},\n\nUmealikwa kwenye: *${e.name}*\n📅 ${e.date} saa ${e.time}\n📍 ${e.venue}\n\n🎫 Fungua mwaliko wako na QR ya kuingia:\n${U.inviteUrl(g,e)}\n\nUta hudhuria?\n✅ Nitakuwepo: ${linkYes}\n❌ Siwezi: ${linkNo}\n\nTunakukaribisha kwa furaha kubwa, uwepo wako utatufanya tukio liwe kamili.\n- Nialike Go Tech`;
+  return `Habari ${g.name}\n\nTafadhali pokea mwaliko wa ${e.name}, Itakayofanyika ${e.date}, ${e.venue}, SAA ${e.time}.\n\nTafadhali bofya chaguo mojawapo hapo chini kuthibitisha ushiriki\n\nKaribu Sana!\nIMETUMWA NA NIALIKE GO TECH`;
+};
+const msgKumbusho=(g,e)=>{
+  const ramani = e.mapLink || 'https://maps.app.goo.gl/K1EVSqZsBi8iu1Em7';
+  return `Habari za Wakati Huu ${g.name}!\n\nTunapenda kukukumbusha kuwa KESHO NDIYO SIKU YA ${e.name}. Tutafurahi sana ukijumuika pamoja nasi.\n\nSherehe itafanyika ${e.venue}, SAA ${e.time}\n\nIkiwa kadi yako umeifuta bahati mbaya au hukuiona au hukupata, tafadhali tujulishe ili tuweze kukutumia tena.\n\nTafadhali bofya link hapo chini kupata ramani ya kufika Ukumbini\n${ramani}\n\nKaribu sana na uwe na wakati mwema!\nIMETUMWA NA NIALIKE GO TECH`;
 };
 
 /* ─── WhatsApp QUEUE ─── */
@@ -352,29 +354,23 @@ const A={
   tab:d=>{S.tab=d.k;render()},
   open:d=>{S.eid=d.id;S.q='';render()},
   back(){S.eid=null;S.q='';render()},
-
   newev(){
     if(!val('n_name')||!val('n_venue'))return alert('Jaza jina la tukio na mahali (*).');
-    DB.addEvent({name:val('n_name'),type:val('n_type'),date:val('n_date'),time:val('n_time'),venue:val('n_venue'),pkg:val('n_pkg'),card:'assets/cards/card'+val('n_card')+'.jpg'});
+    DB.addEvent({name:val('n_name'),type:val('n_type'),date:val('n_date'),time:val('n_time'),venue:val('n_venue'),mapLink:val('n_map'),pkg:val('n_pkg'),card:'assets/cards/card'+val('n_card')+'.jpg'});
     render();
   },
    newuser(){
     let name=val('u_name').trim();
     let pin=val('u_pin').trim();
     if(!name) return alert('Jina linahitajika');
-    if(!pin){
-      pin=String(Math.floor(1000+Math.random()*9000));
-    }
+    if(!pin){ pin=String(Math.floor(1000+Math.random()*9000)); }
     if(pin.length<4) return alert('PIN angalau 4');
-    if(DB.d.users.some(u=>u.pin===pin)){
-      pin=String(Math.floor(1000+Math.random()*9000));
-    }
+    if(DB.d.users.some(u=>u.pin===pin)){ pin=String(Math.floor(1000+Math.random()*9000)); }
     const u=DB.addUser({name,role:val('u_role'),pin,events:[...document.querySelectorAll('.u_ev:checked')].map(x=>x.value)});
     alert('✅ Ametengenezwa!\n\nJina: '+u.name+'\nPIN yake: '+u.pin+'\nRole: '+u.role+'\n\nMtumie PIN hii!');
     render();
   },
   deluser:d=>{if(confirm('Futa mtumiaji huyu?')){DB.delUser(d.id);render()}},
-
   mkev:d=>{
     const o=DB.d.orders.find(x=>x.id===d.id);
     if(!o)return;
@@ -394,12 +390,10 @@ const A={
     render();
   },
   cancelorder:d=>{if(confirm('Kataa agizo hili?')){DB.setOrder(d.id,'cancelled');render()}},
-
   addg(){if(!val('g_n'))return alert('Weka jina la mgeni.');DB.addGuest(S.eid,val('g_n'),val('g_p'),{table:val('g_t')});render()},
   bulk(){const n=DB.importText(S.eid,val('g_bulk'));alert(n+' wageni wameongezwa.');render()},
   csvfile:(d,el)=>{const f=el.files[0];if(f){const r=new FileReader();r.onload=()=>{alert(DB.importText(S.eid,r.result)+' wageni wameongezwa.');render()};r.readAsText(f)}},
   delg:d=>{if(confirm('Futa mgeni huyu?')){DB.delGuest(d.id);render()}},
-
   card:async d=>{
     const g=gst(d.id),e=DB.ev(g.eid);
     try{
@@ -472,7 +466,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='pin')
 $('#dg').addEventListener('close',()=>{if(S.u&&S.eid&&S.u.role==='admin')try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows()}catch(e){}});
 render();
 
-// === FIX: TUMA KADI + UJUMBE - System ina-attach yenyewe ===
+/* === ENVAITA STYLE: TUMA KADI + UJUMBE - System ina-attach yenyewe === */
 async function canvasToFile(canvas, jina){
   const blob = await new Promise(r=>canvas.toBlob(r,'image/png'));
   return new File([blob], jina, {type:'image/png'});
@@ -487,56 +481,35 @@ async function shareFileUjumbe(file, ujumbe, simu){
   }
 }
 function tafutaMgeni(gId){
-  const ev = DB.ev(S.eid);
-  const g = ev.guests.find(x=>x.id===gId);
+  const g = gst(gId);
+  const ev = g ? DB.ev(g.eid) : null;
   return {ev, g};
 }
 
-// BUTTON 1: MWALIKO - Kadi bila QR
+// BUTTON 1: MWALIKO - SMS 1 kama ENVAITA - Kadi bila QR (kadi halisi)
 window.tumaMwaliko = async function(gId){
   const {ev, g} = tafutaMgeni(gId);
-  if(!g) return alert("Mgeni hajapatikana");
-  const canvas = document.createElement('canvas');
-  canvas.width=800; canvas.height=1000;
-  const c = canvas.getContext('2d');
-  c.fillStyle="#1a1a2e"; c.fillRect(0,0,800,1000);
-  c.fillStyle="#FFD700"; c.fillRect(0,0,800,10); c.fillRect(0,990,800,10);
-  c.fillStyle="#fff"; c.textAlign="center";
-  c.font="bold 32px Arial"; c.fillText("UMEALIKWA",400,130);
-  c.font="bold 42px Arial"; c.fillStyle="#FFD700"; c.fillText(ev.name,400,220);
-  c.fillStyle="#fff"; c.font="26px Arial"; c.fillText("Mgeni Maalum:",400,330);
-  c.font="bold 42px Arial"; c.fillText(g.name,400,390);
-  c.font="26px Arial"; c.fillText("📅 "+ev.date+" | 🕐 "+ev.time,400,520);
-  c.fillText("📍 "+ev.venue,400,580);
-  c.fillText("Karibu Sana!",400,720);
-  const file = await canvasToFile(canvas, 'Mwaliko-'+g.name+'.png');
-  const ujumbe = `Habari ${g.name}\nTafadhali pokea mwaliko wa ${ev.name}\n📅 ${ev.date} | 🕐 ${ev.time}\n📍 ${ev.venue}\n\nJibu hapa:\n✅ Nitakuwepo\n❌ Siwezi\n\nKaribu Sana! - Nialike Go Tech`;
-  await shareFileUjumbe(file, ujumbe, g.p);
+  if(!g || !ev) return alert("Mgeni hajapatikana");
+  try{
+    const x = await dlimg(g, ev);
+    const file = new File([x.b], x.f, {type:'image/png'});
+    const ujumbe = msg(g, ev);
+    await shareFileUjumbe(file, ujumbe, U.phone(g.phone));
+    DB.markSent(g.id); render();
+  }catch(e){ alert('Kadi haikutengenezwa. Fungua kwa HTTPS.'); }
 };
 
-// BUTTON 2: AMELIPA - Kadi yenye QR
+// BUTTON 2: AMELIPA / KUMBUKUMBU - SMS 2 kama ENVAITA - Kadi yenye QR + Ramani
 window.tumaKadiYaQR = async function(gId){
   const {ev, g} = tafutaMgeni(gId);
-  if(!g) return alert("Mgeni hajapatikana");
-  if(!confirm(g.name+" amelipa mchango? Tuma Kadi ya QR?")) return;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('NIALIKE-'+g.id+'-'+g.name)}`;
-  const qr = new Image(); qr.crossOrigin="anonymous"; qr.src=qrUrl;
-  qr.onload = async ()=>{
-    const canvas = document.createElement('canvas');
-    canvas.width=800; canvas.height=1100;
-    const c = canvas.getContext('2d');
-    c.fillStyle="#fff"; c.fillRect(0,0,800,1100);
-    c.fillStyle="#1a1a2e"; c.fillRect(0,0,800,10);
-    c.fillStyle="#1a1a2e"; c.textAlign="center";
-    c.font="bold 32px Arial"; c.fillText("KADI YA KUINGIA",400,80);
-    c.font="bold 38px Arial"; c.fillText(g.name,400,140);
-    c.font="24px Arial"; c.fillText(ev.name+" | "+ev.date,400,190);
-    c.drawImage(qr,250,230,300,300);
-    c.font="bold 28px Arial"; c.fillText("ONESHA HII GETINI",400,620);
-    c.font="22px Arial"; c.fillText("📍 "+ev.venue,400,680);
-    const file = await canvasToFile(canvas, 'QR-'+g.name+'.png');
-    const ujumbe = `Habari ${g.name}\nAsante! Malipo yamepokelewa ✅\nHii hapo juu ni Kadi yako ya kuingia yenye QR.\n📅 ${ev.date} | 📍 ${ev.venue}\nKuwa nayo siku ya tukio, utaionesha getini.\nKaribu Sana! - Nialike Go Tech`;
-    g.paid = true; if(typeof save==='function') save();
-    await shareFileUjumbe(file, ujumbe, g.p);
-  };
+  if(!g || !ev) return alert("Mgeni hajapatikana");
+  if(!confirm(g.name+" amelipa mchango? Tuma Kadi ya QR + Kumbusho?")) return;
+  try{
+    const x = await dlimg(g, ev);
+    const file = new File([x.b], x.f, {type:'image/png'});
+    const ujumbe = msgKumbusho(g, ev);
+    g.paid = true;
+    await shareFileUjumbe(file, ujumbe, U.phone(g.phone));
+    DB.markSent(g.id); render();
+  }catch(e){ alert('Kadi haikutengenezwa. Fungua kwa HTTPS.'); }
 };
