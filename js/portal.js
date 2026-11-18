@@ -14,7 +14,10 @@ function render(){
   stop();const a=$('#app');
   if(!DB.d.users.some(u=>u.role==='admin')){
    
-    }
+    if(!location.search.includes('master=NIALIKE2024')){
+a.innerHTML='<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div><p class="m">Ingiza Password kuendelea</p><input id="l_pin" type="password" inputmode="numeric" placeholder="Password / PIN"><button class="b full" data-a="login">Ingia</button></div>';
+return;
+}
     a.innerHTML=`<div class="login">
       <div class="logo-lg">Nialike <i>Go Tech</i></div>
       <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
