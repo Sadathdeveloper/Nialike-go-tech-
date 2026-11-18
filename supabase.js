@@ -25,3 +25,12 @@ localStorage.setItem = function(k, v) {
   _origSetItem(k, v);
   if (k === 'ngt_db') saveToCloud();
 };
+
+// Pakua kutoka Cloud ukifungua simu mpya, halafu refresh mara 1 tu
+(function(){
+  if (sessionStorage.getItem('ngt_cloud_loaded')) return;
+  sessionStorage.setItem('ngt_cloud_loaded', '1');
+  loadFromCloud().then(function(ok){
+    if (ok) location.reload();
+  });
+})();
