@@ -1,7 +1,7 @@
 /* PORTAL v4 – Admin (muonekano mpya) / Staff (QR Scanner) / Client – faili moja safi */
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CARDS=['Blush Floral QR','Lace & Ribbon','Golden Rose','Ivory & Emerald','Emerald Heritage','Forest Duo','Crimson Romance'];
-const S={u:null,eid:null,tab:'dash',q:'',gev:null,f:'all',gq:'',sel:new Set(),step:1,mev:null,dr:{},sq:[],si:0};
+const S={u:null,eid:null,tab:'dash',q:'',gev:null,f:'all',gq:'',sel:new Set(),step:1,mev:null,dr:{},sq:[],si:0,ef:'all',rc:[]};
 let stream=null,timer=null,last='',lastAt=0;
 try{const i=sessionStorage.getItem('ngt_u');if(i)S.u=DB.user(i)}catch(e){}
 const T=t=>t?new Date(t).toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'}):'—';
@@ -12,6 +12,36 @@ const ini=n=>String(n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('')
 const curE=()=>(S.gev&&DB.ev(S.gev))||EV()[0];
 const cardName=e=>CARDS[parseInt(e.card?.match(/card(\d)/)?.[1]||1)-1]||'—';
 function stop(){clearInterval(timer);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+
+/* ─── HELPERS ─── */
+const toast=m=>{let t=$('#ts');if(!t){t=document.createElement('div');t.id='ts';document.body.appendChild(t)}t.textContent=m;t.className='on';clearTimeout(t._t);t._t=setTimeout(()=>t.className='',2200)};
+const beep=ok=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.frequency.value=ok?880:220;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close()},ok?120:350)}catch(e){}};
+const X={g:(()=>{try{return JSON.parse(localStorage.getItem('ngt_x'))||{}}catch(e){return{}}})(),
+ set(id,p){this.g[id]=Object.assign(this.g[id]||{},p);try{localStorage.setItem('ngt_x',JSON.stringify(this.g))}catch(e){}const g=DB.d.guests.find(x=>x.id===id);if(g)Object.assign(g,p)},
+ apply(){DB.d.guests.forEach(g=>{if(this.g[g.id])Object.assign(g,this.g[g.id])})}};
+const upd=(g,p)=>X.set(g.id,p);
+const ph=p=>{let d=String(p||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('0'))d='255'+d.slice(1);else if(d.length===9)d='255'+d;return /^\d{11,15}$/.test(d)?d:''};
+const KEY=()=>{try{return localStorage.getItem('ngt_key')||''}catch(e){return''}};
+const api=async(path,body)=>{const r=await fetch(path,{method:body?'POST':'GET',headers:{'content-type':'application/json','x-portal-key':KEY()},body:body?JSON.stringify(body):undefined});let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j};
+const syncRsvp=async quiet=>{
+  if(!KEY())return;let n=0;
+  for(const e of EV()){try{const r=await api('/api/rsvp?ev='+encodeURIComponent(e.id));Object.keys(r.rsvp||{}).forEach(id=>{const g=DB.d.guests.find(x=>x.id===id);if(g&&g.rsvp!==r.rsvp[id]){X.set(id,{rsvp:r.rsvp[id]});n++}})}catch(x){if(!quiet)toast('RSVP: '+x.message);return}}
+  if(n){if(quiet&&/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||''))return toast('Majibu mapya: '+n);toast('Majibu mapya: '+n);render()}else if(!quiet)toast('Hakuna majibu mapya');
+};
+const rsv=()=>{const l=GS(S.eid),y=l.filter(g=>g.rsvp==='yes').length,n=l.filter(g=>g.rsvp==='no').length;return `<p class="m">Wanashiriki ${y} · Hawashiriki ${n} · Hawajajibu ${l.length-y-n}</p>`};
+const rl=(a,g)=>`${location.origin}/api/r?a=${a}&ev=${g.eid}&g=${encodeURIComponent(g.id)}`;
+const addG=eid=>{
+  const n=val('g_n').trim(),p=val('g_p').trim();
+  if(!n){alert('Weka jina la mgeni.');return false}
+  if(p&&!ph(p)){alert('Namba si sahihi. Mfano: 0712345678');return false}
+  const d=p&&GS(eid).find(g=>ph(g.phone)===ph(p));
+  if(d&&!confirm('Namba hii ipo kwa '+d.name+'. Endelea?'))return false;
+  const c=val('g_c')||'Kawaida',x=+val('g_x')||1,g=DB.addGuest(eid,n,p,{table:val('g_t'),cat:c,pax:x});
+  if(g&&g.id)X.set(g.id,{cat:c,pax:x});return true;
+};
+const markDone=(g,t)=>{if(t==='mwaliko')DB.markSent(g.id);else if(t==='qr'){DB.markSent(g.id);upd(g,{qr:1})}else if(t==='kumbusho')upd(g,{rem:1});else upd(g,{thx:1})};
+const days=e=>{const n=Math.ceil((new Date(e.date)-new Date().setHours(0,0,0,0))/864e5);return isNaN(n)?'':n>0?'⏳ Siku '+n+' zimebaki':n===0?'🎉 Leo ndio siku!':'Limepita'};
+const rcHtml=()=>S.rc.length?`<div class="c"><h3>Scans za karibuni</h3>${S.rc.map(x=>`<div class="rc"><span>${E(x.n)}</span><span>${x.r==='ok'?'✅':'⚠'} ${T(x.t)}</span></div>`).join('')}</div>`:'';
 
 /* ─── CSS ─── */
 (()=>{const s=document.createElement('style');s.textContent=`
@@ -50,11 +80,18 @@ function stop(){clearInterval(timer);if(stream){stream.getTracks().forEach(t=>t.
 .wa{background:#13231a;border-radius:16px;padding:10px}
 .wa .bub{background:#0d3b24;border-radius:10px;padding:8px;color:#e8f5ec;font-size:.85rem;line-height:1.45;white-space:pre-wrap}
 .wa img{width:100%;border-radius:8px;margin-bottom:8px;display:block}.wa .tm{text-align:right;font-size:.65rem;color:#8aa394;margin-top:4px}
+.v4g{flex-wrap:wrap}.ga{display:flex;gap:6px;flex-wrap:wrap;width:100%;padding-left:32px;padding-bottom:4px}
+.av.vip{background:#4a3a0b;color:#facc15}.tg{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.bd.cat{background:rgba(148,163,184,.15);color:#cbd5e1;cursor:pointer}
+#ts{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:#16a34a;color:#fff;padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:99;pointer-events:none;font-size:.85rem}#ts.on{opacity:1;transform:translate(-50%,0)}
+.nx{background:linear-gradient(135deg,#14532d,#0b1d13)}.nx b{font-size:1.1rem}.nx .cd{color:#facc15;font-size:.85rem;margin-top:4px}
+.rc{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.8rem}
+.opt{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;margin-bottom:8px;cursor:pointer;background:#0b1d13;display:flex;gap:10px;align-items:center}.opt.on{border:2px solid #22c55e;padding:9px}
 `;document.head.appendChild(s)})();
 
 /* ─── RENDER ─── */
 function render(){
-  stop();const a=$('#app');
+  stop();X.apply();const a=$('#app');
   if(!DB.d.users.some(u=>u.role==='admin')){
     if(!location.search.includes('master=NIALIKE2024')){
       a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div><p class="m" style="color:#f87171">⛔ System imefungwa. Wasiliana na Admin mkuu.</p></div>`;return;
@@ -100,9 +137,12 @@ function body(){
 /* ─── ADMIN: DASHIBODI ─── */
 function vDash(){
   const ev=EV(),gs=DB.d.guests,inn=gs.filter(g=>g.status==='in').length;
-  const sg=[['📅',ev.length,'Matukio Yote','events'],['👥',gs.length,'Wageni Wote','guests'],['⏳',gs.length-inn,'Wanasubiri','guests'],['✅',inn,'Wameingia','report']];
+  const today=new Date().setHours(0,0,0,0);
+  const nx=ev.filter(e=>new Date(e.date)>=today).sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
+  const sg=[['📅',ev.length,'Matukio','events'],['👥',gs.length,'Wageni','guests'],['📨',gs.filter(g=>g.sent).length,'Waliotumwa','guests'],['💰',gs.filter(g=>g.paid).length,'Wamelipa','guests'],['⏳',gs.length-inn,'Wanasubiri','guests'],['✅',inn,'Wameingia','report'],['⭐',gs.filter(g=>g.cat==='VIP').length,'VIP','guests'],['👍',gs.filter(g=>g.rsvp==='yes').length,'Wanashiriki','guests']];
   const qa=[['🗓','Tukio Jipya','events'],['➕','Ongeza Mgeni','guests'],['✈️','Tuma Mwaliko','send'],['📷','Scan QR','events'],['📊','Ripoti','report'],['📦','Maagizo','orders'],['👤','Watumiaji','users'],['⚙️','Mipangilio','sync']];
   return `<div class="v4c hi"><div><small class="m">Karibu tena,</small><h2>${E(S.u.name)} <span class="badge">SUPER ADMIN</span></h2></div><small class="m">${new Date().toLocaleDateString('sw-TZ',{weekday:'long',day:'numeric',month:'short',year:'numeric'})}</small></div>
+  ${nx?`<div class="v4c nx" data-a="open" data-id="${nx.id}" style="cursor:pointer"><small class="m">Tukio linalofuata</small><br><b>${E(nx.name)}</b><p class="m">📅 ${nx.date} ${nx.time||''} · 📍 ${E(nx.venue)}</p><div class="cd">${days(nx)}</div></div>`:''}
   <div class="v4c"><h3>Muhtasari wa Haraka</h3><div class="sg">${sg.map(x=>`<a data-a="nav" data-k="${x[3]}">${x[0]}<b>${x[1]}</b>${x[2]}</a>`).join('')}</div></div>
   <div class="v4c"><h3>Vitendo vya Haraka</h3><div class="qa">${qa.map(x=>`<a data-a="nav" data-k="${x[2]}"><span>${x[0]}</span>${x[1]}</a>`).join('')}</div></div>
   <div class="v4c"><h3>Matukio ya Hivi Punde</h3>${ev.slice(-3).reverse().map(e=>{const s=DB.stats(e.id);return `<div class="ev4" data-a="open" data-id="${e.id}"><div class="t"><b>${E(e.name)}</b><span class="m">${E(e.date)}</span></div><small>📍 ${E(e.venue)} · 📦 ${E(e.pkg)}</small><div class="bar"><i style="width:${s.pct}%"></i></div><div class="fo"><span>👥 ${s.total} walioalikwa</span><span>✓ ${s.in} walioingia</span><span>${s.pct}%</span></div></div>`}).join('')||'<p class="m">Hakuna tukio bado. Bofya "Tukio Jipya".</p>'}</div>`;
@@ -133,54 +173,67 @@ function vEvents(){
 }
 
 /* ─── ADMIN: WAGENI ─── */
-function gRows(){
-  const e=curE();if(!e)return '';
-  const q=(S.gq||'').toLowerCase();
-  const l=GS(e.id).filter(g=>(S.f==='all'||(S.f==='sent'?g.sent:!g.sent))&&(g.name+g.phone).toLowerCase().includes(q));
-  return l.length?l.map(g=>`<div class="v4g"><span class="ck ${S.sel.has(g.id)?'on':''}" data-a="gsel" data-id="${g.id}">✓</span><i class="av">${E(ini(g.name))}</i><div class="gi"><b>${E(g.name)}</b><small>${E(g.phone)||'—'}${g.table?' · Meza '+E(g.table):''}</small></div><div class="gr"><span class="bd ${g.sent?'ok':'no'}">${g.sent?'Waliotumwa':'Hawajatumwa'}</span><small>${g.status==='in'?'✓ '+T(g.at):''}</small></div><button class="b o s" data-a="card" data-id="${g.id}" title="Ona kadi">🎫</button><button class="b o s" onclick="tumaKadiYaQR('${g.id}')" title="Amelipa - Tuma QR">✅</button><button class="b r s" data-a="delg2" data-id="${g.id}" title="Futa">✕</button></div>`).join(''):'<p class="m" style="padding:14px 0">Hakuna wageni hapa. Ongeza mgeni hapo chini.</p>';
-}
-const sbar=()=>S.sel.size?`<span>☑ ${S.sel.size} wamechaguliwa</span><span class="sp"></span><button class="b" data-a="tosend">Tuma Mwaliko →</button>`:'';
+const CATS=['Kawaida','VIP','Familia'];
+const gRow=(g,chk)=>`<div class="v4g">${chk?`<span class="ck ${S.sel.has(g.id)?'on':''}" data-a="gsel" data-id="${g.id}">✓</span>`:''}<i class="av ${g.cat==='VIP'?'vip':''}">${E(ini(g.name))}</i><div class="gi"><b>${E(g.name)}</b><small>${E(g.phone)||'—'}${g.table?' · Meza '+E(g.table):''}${(g.pax||1)>1?' · 👥 '+g.pax:''}</small><div class="tg"><a class="bd cat" data-a="cyc" data-id="${g.id}">${E(g.cat||'Kawaida')}</a>${g.paid?'<span class="bd ok">💰 Amelipa</span>':''}${g.qr?'<span class="bd ok">QR imetumwa</span>':''}${g.rsvp==='yes'?'<span class="bd ok">Atashiriki</span>':g.rsvp==='no'?'<span class="bd no">Hatashiriki</span>':''}${g.phone&&!ph(g.phone)?'<span class="bd no">Namba si sahihi</span>':''}</div></div><div class="gr"><span class="bd ${g.sent?'ok':'no'}">${g.sent?'Imetumwa':'Haijatumwa'}</span><small>${g.status==='in'?'✓ '+T(g.at):''}</small></div><div class="ga"><button class="b o s" data-a="card" data-id="${g.id}">🎫 Kadi</button><button class="b o s" data-a="pay" data-id="${g.id}">${g.paid?'↩ Hajalipa':'💰 Amelipa'}</button><button class="b o s" onclick="tumaKadiYaQR('${g.id}')">✅ Tuma QR</button><button class="b o s" data-a="gedit" data-id="${g.id}">✏️ Hariri</button><button class="b r s" data-a="${chk?'delg2':'delg'}" data-id="${g.id}">✕</button></div></div>`;
+const gFilter=(g,f)=>f==='all'||(f==='sent'&&g.sent)||(f==='unsent'&&!g.sent)||(f==='paid'&&g.paid)||(f==='unpaid'&&!g.paid)||(f==='in'&&g.status==='in')||(f==='pending'&&g.status!=='in')||(f==='vip'&&g.cat==='VIP')||(f==='yes'&&g.rsvp==='yes')||(f==='no'&&g.rsvp==='no')||(f==='nor'&&!g.rsvp);
+const gList=()=>{const e=curE();if(!e)return[];const q=(S.gq||'').toLowerCase();return GS(e.id).filter(g=>gFilter(g,S.f)&&(g.name+g.phone+(g.table||'')).toLowerCase().includes(q))};
+const gRows=()=>{const l=gList();return l.length?l.map(g=>gRow(g,true)).join(''):'<p class="m" style="padding:14px 0">Hakuna wageni hapa. Ongeza mgeni hapo chini.</p>'};
+const sbar=()=>S.sel.size?`<span>☑ ${S.sel.size}</span><span class="sp"></span><button class="b r s" data-a="delsel">🗑</button><button class="b" data-a="tosend">Tuma Mwaliko →</button>`:'';
+const addForm=()=>`<div class="row"><input id="g_n" placeholder="Jina *"><input id="g_p" type="tel" placeholder="0712..."><input id="g_t" placeholder="Meza"></div>
+  <div class="row"><select id="g_c">${CATS.map(c=>`<option>${c}</option>`).join('')}</select><select id="g_x">${[1,2,3,4,5].map(n=>`<option value="${n}">${n===1?'Single (1)':n===2?'Double (2)':'Watu '+n}</option>`).join('')}</select></div>`;
 function vGuests(){
   const e=curE();
   if(!e)return `<div class="v4c"><p class="m">Tengeneza tukio kwanza.</p><button class="b" data-a="nav" data-k="events">Tukio Jipya</button></div>`;
-  const all=GS(e.id),sent=all.filter(g=>g.sent).length,f=S.f;
+  const all=GS(e.id),f=S.f,n=k=>all.filter(g=>gFilter(g,k)).length;
+  const chip=(k,l)=>`<a data-a="gf" data-k="${k}" class="${f===k?'on':''}">${l} (${n(k)})</a>`;
   return `<h2>Wageni</h2>
   <select id="gev" style="margin-bottom:8px">${EV().map(x=>`<option value="${x.id}" ${x.id===e.id?'selected':''}>${E(x.name)} · ${E(x.date)}</option>`).join('')}</select>
-  <div class="chips"><a data-a="gf" data-k="all" class="${f==='all'?'on':''}">Wote (${all.length})</a><a data-a="gf" data-k="sent" class="${f==='sent'?'on':''}">Waliotumwa (${sent})</a><a data-a="gf" data-k="unsent" class="${f==='unsent'?'on':''}">Hawajatumwa (${all.length-sent})</a></div>
-  <input id="gq" placeholder="🔍 Tafuta mgeni..." value="${E(S.gq)}">
+  <div class="chips">${chip('all','Wote')}${chip('unsent','Hawajatumwa')}${chip('sent','Waliotumwa')}${chip('paid','Wamelipa')}${chip('unpaid','Hawajalipa')}${chip('vip','VIP')}${chip('yes','Wanashiriki')}${chip('no','Hawashiriki')}${chip('nor','Hawajajibu')}</div>
+  <div class="row"><input id="gq" placeholder="🔍 Tafuta jina, namba au meza..." value="${E(S.gq)}"><button class="b o s" data-a="gall">☑ Chagua wote</button>${KEY()?'<button class="b o s" data-a="rsvp">🔄 RSVP</button>':''}</div>
   <div class="v4c" style="margin-top:12px;padding:8px 14px"><div id="gl">${gRows()}</div></div>
-  <details class="v4c"><summary><b>+ Ongeza Wageni</b></summary>
-    <div class="row" style="margin-top:10px"><input id="g_n" placeholder="Jina *"><input id="g_p" type="tel" placeholder="0712... "><input id="g_t" placeholder="Meza"><button class="b" data-a="addg2">+ Ongeza</button></div>
-    <textarea id="g_bulk" rows="4" placeholder="Bandika orodha (Jina, Namba, Meza kila mstari)"></textarea>
+  <details class="v4c"><summary><b>+ Ongeza Wageni</b></summary><div style="margin-top:10px">${addForm()}<button class="b" data-a="addg2">+ Ongeza</button></div>
+    <textarea id="g_bulk" rows="4" placeholder="Bandika orodha (Jina, Namba, Meza kila mstari)" style="margin-top:10px"></textarea>
     <div class="row"><button class="b o" data-a="bulk2">📋 Ingiza Orodha</button><label class="b o" style="cursor:pointer">📁 Pakia CSV/TXT<input type="file" accept=".csv,.txt" hidden data-a="csvfile2"></label></div>
   </details>
   <div class="sb" id="sb" ${S.sel.size?'':'hidden'}>${sbar()}</div>`;
 }
 
-/* ─── ADMIN: TUMA MWALIKO (wizard) ─── */
-const defDr=e=>({title:'Habari {JINA}!',body:`Tafadhali pokea mwaliko wa ${String(e.name).toUpperCase()}, itakayofanyika tarehe ${e.date}, ${e.venue}, SAA ${e.time||''}.`,map:e.location||'',close:'Karibu sana na uwe na wakati mwema!'});
-const ldDr=e=>{try{return JSON.parse(localStorage.getItem('v4dr'+e.id))||defDr(e)}catch(x){return defDr(e)}};
-const build=g=>{const d=S.dr;return `${(d.title||'').replace(/\{JINA\}/g,g.name)}\n\n${d.body||''}\n\n${d.map?'Tafadhali tumia kiungo hapa chini kupata ramani ya kufika ukumbini.\n📍 '+d.map+'\n\n':''}${d.close||''}`};
+/* ─── ADMIN: TUMA MWALIKO (wizard: Tukio → Aina → Wapokeaji → Ujumbe) ─── */
+const TY={mwaliko:['✉️','Mwaliko wa kawaida','Kadi na maelezo ya tukio, pamoja na jibu la kushiriki.'],qr:['🔳','Mwaliko wenye QR','Kadi ya kuingia yenye QR kwa waliolipa.'],kumbusho:['🔔','Kumbusho','Kukumbusha wageni kabla ya siku ya tukio.'],asante:['🙏','Asante','Shukrani kwa waliohudhuria.']};
+const defDr=(e,t='mwaliko')=>{
+  const N=String(e.name).toUpperCase(),w=`tarehe ${e.date}, ${e.venue}, SAA ${e.time||''}`;
+  const m={mwaliko:['Habari {JINA}!',`Tafadhali pokea mwaliko wa ${N}, itakayofanyika ${w}.`,'Karibu sana na uwe na wakati mwema!'],
+    qr:['Habari {JINA}!',`Asante! Malipo yamepokelewa. Hii ni kadi yako ya kuingia kwa ${N}, ${w}. Kuwa nayo siku ya tukio, utaionesha getini.`,'Karibu sana!'],
+    kumbusho:['Habari {JINA}, kumbusho!',`Tunakukumbusha kuhusu ${N} itakayofanyika ${w}. Tafadhali fika mapema.`,'Tunakusubiri kwa hamu!'],
+    asante:['Asante {JINA}!',`Tunakushukuru kwa kuhudhuria na kuchangia ${N}.`,'Mungu akubariki.']}[t];
+  return {tpl:t,title:m[0],body:m[1],map:e.location||'',close:m[2],pay:''};
+};
+const ldDr=e=>{try{return Object.assign(defDr(e),JSON.parse(localStorage.getItem('v4dr'+e.id))||{})}catch(x){return defDr(e)}};
+const defSel=(e,t)=>new Set(GS(e.id).filter(g=>ph(g.phone)&&(t==='qr'?g.paid:t==='asante'?g.status==='in':t==='kumbusho'?g.rsvp!=='no':!g.sent)).map(g=>g.id));
+const build=(g,api)=>{const d=S.dr,t=d.tpl||'mwaliko';return `${(d.title||'').replace(/\{JINA\}/g,g.name)}\n\n${d.body||''}\n\n${d.map?'Ramani ya kufika ukumbini:\n📍 '+d.map+'\n\n':''}${d.pay&&t!=='asante'?'💳 Michango/Malipo: '+d.pay+'\n\n':''}${d.close||''}${t==='mwaliko'&&!api?`\n\nUtaweza kushiriki?\n✅ Nitashiriki: ${rl('yes',g)}\n❌ Sitashiriki: ${rl('no',g)}`:''}`};
+const prevTxt=g=>build(g,!!KEY());
+const modeNote=()=>`<p class="m" style="margin:8px 0">${KEY()?'⚡ Kutuma kiotomatiki kupitia WhatsApp API, na vitufe vya Nitashiriki / Sitashiriki.':'✋ Kutuma kwa mkono: WhatsApp inafunguka kwa kila mgeni. Weka funguo ya API kwenye Mipangilio ili kutuma kiotomatiki.'}</p>`;
 function vSend(){
   const e=S.mev&&DB.ev(S.mev);if(!e)S.step=1;
-  const bar=`<div class="stp">${['Chagua Tukio','Wapokeaji','Ujumbe'].map((t,i)=>`<span class="${S.step>i+1?'dn':S.step===i+1?'on':''}">${S.step>i+1?'✓':i+1}</span><em>${t}</em>`).join('<hr>')}</div>`;
-  if(S.step===1)return `<h2>Tuma Mwaliko</h2>${bar}`+(EV().map(x=>{const s=DB.stats(x.id);return `<div class="ev4" data-a="sev" data-id="${x.id}"><div class="t"><b>${E(x.name)}</b><span class="m">${E(x.date)}</span></div><small>📍 ${E(x.venue)} · 👥 ${s.total} wageni</small></div>`}).join('')||'<p class="m">Hakuna tukio.</p>');
-  if(S.step===2){
-    const l=GS(e.id).filter(g=>g.phone);
-    return `<h2>Tuma Mwaliko</h2><p class="m">${E(e.name)}</p>${bar}
-    <div class="row"><button class="b o s" data-a="selu">Wasiotumwa</button><button class="b o s" data-a="sela">Wote</button><button class="b o s" data-a="selc">Futa chaguo</button></div>
-    <div class="v4c" style="margin-top:10px;padding:8px 14px">${l.map(g=>`<div class="v4g"><span class="ck ${S.sel.has(g.id)?'on':''}" data-a="gsel2" data-id="${g.id}">✓</span><i class="av">${E(ini(g.name))}</i><div class="gi"><b>${E(g.name)}</b><small>${E(g.phone)}</small></div><span class="bd ${g.sent?'ok':'no'}">${g.sent?'Imetumwa':'Haijatumwa'}</span></div>`).join('')||'<p class="m">Hakuna wageni wenye namba.</p>'}</div>
-    <div class="sb"><span>☑ ${S.sel.size}</span><span class="sp"></span><button class="b o" data-a="sstep" data-k="1">← Rudi</button><button class="b" data-a="sstep" data-k="3">Endelea →</button></div>`;
+  const bar=`<div class="stp">${['Tukio','Aina','Wapokeaji','Ujumbe'].map((t,i)=>`<span class="${S.step>i+1?'dn':S.step===i+1?'on':''}">${S.step>i+1?'✓':i+1}</span><em>${t}</em>`).join('<hr>')}</div>`;
+  if(S.step===1)return `<h2>Tuma Mwaliko</h2>${bar}`+(EV().map(x=>{const s=DB.stats(x.id);return `<div class="ev4" data-a="sev" data-id="${x.id}"><div class="t"><b>${E(x.name)}</b><span class="m">${E(x.date)}</span></div><small>📍 ${E(x.venue)} · 👥 ${s.total} wageni · ${days(x)}</small></div>`}).join('')||'<p class="m">Hakuna tukio.</p>');
+  const head=`<h2>Tuma Mwaliko</h2><p class="m">${E(e.name)}</p>${bar}`;
+  const t=S.dr.tpl||'mwaliko';
+  if(S.step===2)return head+Object.entries(TY).map(([k,v])=>`<div class="opt ${t===k?'on':''}" data-a="stype" data-k="${k}"><span style="font-size:1.4rem">${v[0]}</span><div><b>${v[1]}</b><p class="m">${v[2]}</p></div></div>`).join('')+modeNote()+
+    `<div class="sb"><button class="b o" data-a="sstep" data-k="1">← Rudi</button><span class="sp"></span><button class="b" data-a="sstep" data-k="3">Endelea →</button></div>`;
+  if(S.step===3){
+    const l=GS(e.id);
+    return `${head}<div class="row"><button class="b o s" data-a="selu">Waliopendekezwa</button><button class="b o s" data-a="sela">Wote wenye namba</button><button class="b o s" data-a="selc">Futa chaguo</button></div>
+    <div class="v4c" style="margin-top:10px;padding:8px 14px">${l.map(g=>ph(g.phone)?`<div class="v4g"><span class="ck ${S.sel.has(g.id)?'on':''}" data-a="gsel2" data-id="${g.id}">✓</span><i class="av ${g.cat==='VIP'?'vip':''}">${E(ini(g.name))}</i><div class="gi"><b>${E(g.name)}</b><small>${E(g.phone)} · ${E(g.cat||'Kawaida')}</small></div><span class="bd ${g.paid?'ok':'no'}">${g.paid?'Amelipa':'Hajalipa'}</span><span class="bd ${g.sent?'ok':'no'}">${g.sent?'Imetumwa':'Haijatumwa'}</span></div>`:`<div class="v4g" style="opacity:.6"><i class="av">${E(ini(g.name))}</i><div class="gi"><b>${E(g.name)}</b><small>${E(g.phone)||'Hana namba'}</small></div><span class="bd no">Namba si sahihi</span><button class="b o s" data-a="gedit" data-id="${g.id}">✏️</button></div>`).join('')||'<p class="m">Hakuna wageni.</p>'}</div>
+    <div class="sb"><span>☑ ${S.sel.size}</span><span class="sp"></span><button class="b o" data-a="sstep" data-k="2">← Rudi</button><button class="b" data-a="sstep" data-k="4">Endelea →</button></div>`;
   }
-  const d=S.dr,first=GS(e.id).find(g=>S.sel.has(g.id))||{name:'Mgeni'};
+  const d=S.dr,first=GS(e.id).find(g=>S.sel.has(g.id))||{name:'Mgeni',id:'x',eid:e.id};
   const f=(id,l,v,max,ta)=>`<div class="lbl"><span>${l}</span><span id="${id}_n">${v.length}/${max}</span></div>${ta?`<textarea id="${id}" rows="4" maxlength="${max}">${E(v)}</textarea>`:`<input id="${id}" maxlength="${max}" value="${E(v)}">`}`;
-  return `<h2>Tuma Mwaliko</h2><p class="m">${E(e.name)}</p>${bar}
-  <div class="v4c"><div class="lbl" style="margin:0"><span>Kadi ya Mwaliko</span></div><div class="row" style="align-items:center;margin-top:8px">${e.card?`<img src="${E(e.card)}" style="width:80px;border-radius:8px" onerror="this.remove()">`:''}<div><b>${E(cardName(e))}</b><p class="m">Template ya tukio</p></div></div></div>
-  ${f('m_title','Kichwa cha ujumbe',d.title||'',50)}${f('m_body','Maelezo ya Tukio',d.body||'',500,1)}${f('m_map','Kiungo cha Ramani (Google Maps)',d.map||'',300)}${f('m_close','Hitimisho',d.close||'',100)}
-  <div class="lbl"><span>Preview ya WhatsApp</span></div>
-  <div class="wa">${e.card?`<img src="${E(e.card)}" onerror="this.remove()">`:''}<div class="bub" id="pv">${E(build(first))}</div><div class="tm">${new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'})} ✓✓</div></div>
-  <p class="m" style="margin-top:8px">ℹ Kila mgeni atapokea ujumbe wenye jina lake.</p>
-  <div class="sb"><button class="b o" data-a="sdraft">Hifadhi Draft</button><span class="sp"></span><button class="b" data-a="sstep" data-k="2">←</button><button class="b" data-a="vsend0">✈ Tuma (${S.sel.size})</button></div>`;
+  const img=t==='qr'?`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(first.code||first.id)}`:(t==='mwaliko'&&e.card?e.card:'');
+  return `${head}${f('m_title','Kichwa cha ujumbe',d.title||'',50)}${f('m_body','Maelezo ya Tukio',d.body||'',500,1)}${f('m_map','Kiungo cha Ramani (Google Maps)',d.map||'',300)}${f('m_pay','Namba ya Malipo / Michango (hiari)',d.pay||'',100)}${f('m_close','Hitimisho',d.close||'',100)}
+  ${modeNote()}<div class="lbl"><span>Preview ya WhatsApp</span></div>
+  <div class="wa">${img?`<img src="${E(img)}" onerror="this.remove()">`:''}<div class="bub" id="pv">${E(prevTxt(first))}</div>${KEY()&&t==='mwaliko'?'<div class="row" style="margin-top:6px"><span class="b o s" style="flex:1;text-align:center">Nitashiriki</span><span class="b o s" style="flex:1;text-align:center">Sitashiriki</span></div>':''}<div class="tm">${new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'})} ✓✓</div></div>
+  <div class="sb"><button class="b o" data-a="sdraft">Hifadhi Draft</button><span class="sp"></span><button class="b" data-a="sstep" data-k="3">←</button><button class="b" data-a="vsend0">✈ Tuma (${S.sel.size})</button></div>`;
 }
 
 /* ─── ADMIN: RIPOTI ─── */
@@ -236,6 +289,9 @@ function vOrders(){
 function vSync(){
   return `<h2>Mipangilio – Sync</h2>
   <p class="m" style="margin-bottom:14px">Data iko kwenye kifaa hiki tu. Hamisha kati ya vifaa kwa faili la JSON.</p>
+  <div class="v4c"><h3>WhatsApp API na RSVP</h3><p class="m">Hali: ${KEY()?'✅ Funguo imewekwa (kutuma kiotomatiki)':'✋ Haijaunganishwa (kutuma kwa mkono)'}</p>
+    <input id="k_key" type="password" placeholder="Funguo ya portal (PORTAL_KEY)" style="margin:8px 0">
+    <div class="row"><button class="b" data-a="apikey">Hifadhi</button><button class="b o" data-a="apitest">Jaribu muunganisho</button><button class="b o" data-a="rsvp">🔄 Sync RSVP</button>${KEY()?'<button class="b r s" data-a="apiclear">Ondoa</button>':''}</div></div>
   <div class="v4c"><h3>Tuma data (admin → msimamizi)</h3>
     <p class="m">Admin anatuma "pack" ya tukio kwa msimamizi wa mlango – ina wageni na QR codes.</p>
     <button class="b o" data-a="expall">⬇ Data Yote</button></div>
@@ -251,41 +307,41 @@ const V={dash:vDash,events:vEvents,guests:vGuests,send:vSend,report:vReport,user
 /* ─── EVENT VIEW (Admin/Client) ─── */
 function rows(){
   const q=S.q.toLowerCase(),adm=S.u.role==='admin';
-  const filtered=GS(S.eid).filter(g=>(g.name+g.phone+g.table).toLowerCase().includes(q));
-  if(!filtered.length)return `<p class="m">Hakuna wageni ${q?'wanaolingana na utafutaji':'bado'}.</p>`;
-  return filtered.map(g=>`<div class="g"><div><b>${E(g.name)}</b><div class="m">${E(g.phone)||'—'} ${g.table?'· Meza '+E(g.table):''}</div></div>
-    <div class="g-right">
-      <span class="tag ${g.status==='in'?'in':''}">${g.status==='in'?'✓ '+T(g.at):'⏳ anasubiri'}</span>
-      ${g.sent?'<span class="tag in" style="font-size:.6rem">📨 imetumwa</span>':''}
-      ${adm?`<div class="row" style="margin:0;gap:4px"><button class="b o s" data-a="card" data-id="${g.id}" title="Ona kadi">🎫</button><button class="b o s" onclick="tumaKadiYaQR('${g.id}')" title="Amelipa - Tuma QR">✅</button><button class="b r s" data-a="delg" data-id="${g.id}" title="Futa">✕</button></div>`:''}
-    </div></div>`).join('');
+  const l=GS(S.eid).filter(g=>(!adm||gFilter(g,S.ef))&&(g.name+g.phone+(g.table||'')).toLowerCase().includes(q));
+  if(!l.length)return `<p class="m">Hakuna wageni ${q?'wanaolingana na utafutaji':'bado'}.</p>`;
+  if(adm)return l.map(g=>gRow(g,false)).join('');
+  return l.map(g=>`<div class="g"><div><b>${E(g.name)}</b><div class="m">${E(g.phone)||'—'} ${g.table?'· Meza '+E(g.table):''}</div></div>
+    <div class="g-right"><span class="tag ${g.status==='in'?'in':''}">${g.status==='in'?'✓ '+T(g.at):'⏳ anasubiri'}</span>${g.rsvp==='yes'?'<span class="tag in">Atashiriki</span>':g.rsvp==='no'?'<span class="tag bad">Hatashiriki</span>':''}</div></div>`).join('');
 }
 function stats(){
   const s=DB.stats(S.eid);
   return `<div class="st"><div><b>${s.total}</b>Walioalikwa</div><div><b style="color:var(--g)">${s.in}</b>Walioingia</div><div><b>${s.pending}</b>Wanasubiri</div><div><b style="color:${s.bad?'#f87171':'inherit'}">${s.bad}</b>Zilizokataliwa</div></div>
   <div class="bar"><i style="width:${s.pct}%"></i></div>
-  <p class="m">${s.pct}% wamefika · Ilisasishwa ${new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'})}</p>`;
+  ${rsv()}<p class="m">${s.pct}% wamefika · Ilisasishwa ${new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'})}</p>`;
 }
 function vEvent(){
-  const e=DB.ev(S.eid),adm=S.u.role==='admin';
+  const e=DB.ev(S.eid),adm=S.u.role==='admin',all=GS(S.eid),f=S.ef,n=k=>all.filter(g=>gFilter(g,k)).length;
+  const chip=(k,l)=>`<a data-a="ef" data-k="${k}" class="${f===k?'on':''}">${l} (${n(k)})</a>`;
   return `<button class="b o s" data-a="back">← Rudi</button>
   <h2>${E(e.name)}</h2>
-  <p class="m">📅 ${e.date} ${e.time} · 📍 ${E(e.venue)} · 📦 ${E(e.pkg)}</p>
+  <p class="m">📅 ${e.date} ${e.time} · 📍 ${E(e.venue)} · 📦 ${E(e.pkg)}</p><p class="m" style="color:#facc15">${days(e)}</p>
   ${e.host?`<p class="m">👤 ${E(e.host)}</p>`:''}${e.contact?`<p class="m">📞 Mawasiliano: ${E(e.contact)}</p>`:''}
   ${e.location?`<p class="m">📍 Location: <a href="${E(e.location)}" target="_blank">Fungua Ramani</a></p>`:''}${e.note?`<p class="m">📝 ${E(e.note)}</p>`:''}
+  ${adm?`<div class="sg" style="margin:10px 0"><a>💰<b>${n('paid')}</b>Wamelipa</a><a>📨<b>${n('sent')}</b>Waliotumwa</a><a>⭐<b>${n('vip')}</b>VIP</a><a>👍<b>${all.filter(g=>g.rsvp==='yes').length}</b>Wanashiriki</a></div>`:''}
   <div id="stats">${stats()}</div>
   <div class="row" style="margin-top:14px">
+    ${adm?`<button class="b" data-a="sendev">✈ Tuma Mialiko</button>`:''}
     <button class="b o" data-a="csv">⬇ CSV Ripoti</button><button class="b o" onclick="print()">🖨 Print</button>
     <button class="b o" data-a="expev">⬇ Pack (Sync)</button>
     <label class="b o" style="cursor:pointer">⬆ Ingiza Pack<input type="file" accept=".json" hidden data-a="impfile"></label>
     ${adm?`<button class="b o" data-a="cards">⬇ Kadi Zote</button><button class="b o" data-a="links">⬇ Links CSV</button>`:''}
   </div>
-  ${adm?`<h3>Ongeza Wageni</h3><div class="c">
-    <div class="row"><input id="g_n" placeholder="Jina *"><input id="g_p" type="tel" placeholder="0712... (hiari)"><input id="g_t" placeholder="Meza (hiari)"><button class="b" data-a="addg">+ Ongeza</button></div>
-    <textarea id="g_bulk" rows="4" placeholder="Bandika orodha nyingi (kila mstari: Jina, Namba, Meza)"></textarea>
+  ${adm?`<details class="v4c" style="margin-top:14px"><summary><b>+ Ongeza Wageni</b></summary><div style="margin-top:10px">${addForm()}<button class="b" data-a="addg">+ Ongeza</button></div>
+    <textarea id="g_bulk" rows="4" placeholder="Bandika orodha nyingi (kila mstari: Jina, Namba, Meza)" style="margin-top:10px"></textarea>
     <div class="row"><button class="b o" data-a="bulk">📋 Ingiza Orodha</button>
-    <label class="b o" style="cursor:pointer">📁 Pakia CSV/TXT<input type="file" accept=".csv,.txt" hidden data-a="csvfile"></label></div></div>`:''}
+    <label class="b o" style="cursor:pointer">📁 Pakia CSV/TXT<input type="file" accept=".csv,.txt" hidden data-a="csvfile"></label></div></details>`:''}
   <h3>Orodha ya Wageni</h3>
+  ${adm?`<div class="chips">${chip('all','Wote')}${chip('paid','Wamelipa')}${chip('unpaid','Hawajalipa')}${chip('in','Wameingia')}${chip('pending','Wanasubiri')}${chip('vip','VIP')}</div>`:''}
   <input id="q" placeholder="🔍 Tafuta jina, namba, au meza..." value="${E(S.q)}" style="margin-bottom:10px">
   <div id="gt">${rows()}</div>`;
 }
@@ -296,6 +352,7 @@ function vScan(){
   return `${DB.eventsOf(S.u).length>1?'<button class="b o s" data-a="back">← Matukio</button>':''}
   <h2>🔲 Scan – ${E(e.name)}</h2><div id="stats">${stats()}</div>
   <div class="cam"><video id="v" playsinline muted></video><div id="res" class="res">📷 Elekeza QR kwenye kamera</div></div>
+  <div id="rc">${rcHtml()}</div>
   <div class="row" style="margin-top:10px"><input id="code" placeholder="Au andika code ya QR mwenyewe..."><button class="b" data-a="code">✓ Thibitisha</button></div>
   <h3 style="margin-top:18px">Tafuta / Ingiza kwa Mkono</h3>
   <input id="q" placeholder="🔍 Tafuta jina au namba..." value="${E(S.q)}">
@@ -333,8 +390,8 @@ function show(r){
   }[r.res];
   el.className='res '+m[0];
   el.innerHTML=m[1]+'<small style="font-size:1.05rem;font-weight:700;display:block;margin-top:4px">'+m[2]+'</small>';
-  navigator.vibrate&&navigator.vibrate(r.res==='ok'?[100]:[200,80,200]);
-  try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows2()}catch(e){}
+  navigator.vibrate&&navigator.vibrate(r.res==='ok'?[100]:[200,80,200]);beep(r.res==='ok');S.rc.unshift({n:g?.name||'QR si sahihi',r:r.res,t:Date.now()});S.rc=S.rc.slice(0,5);
+  try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows2();$('#rc').innerHTML=rcHtml()}catch(e){}
 }
 const handle=c=>show(DB.scan(c.trim(),S.u.id,[S.eid]));
 
@@ -351,6 +408,23 @@ const msg=(g,e)=>{
 };
 const rf=()=>{const l=$('#gl'),s=$('#sb');if(l)l.innerHTML=gRows();if(s){s.hidden=!S.sel.size;s.innerHTML=sbar()}};
 
+async function apiRun(){
+  const e=DB.ev(S.mev),t=S.dr.tpl||'mwaliko',ids=S.sq.slice(),bad=[];let ok=0;
+  for(let i=0;i<ids.length;i++){
+    const g=gst(ids[i]);
+    dlg(`<h3>Inatuma…</h3><p class="m">${i+1} / ${ids.length} · ${E(g.name)}</p><div class="bar"><i style="width:${Math.round(i/ids.length*100)}%"></i></div><p class="m">Usifunge ukurasa.</p>`);
+    try{
+      await api('/api/send',{type:t,to:ph(g.phone),guest:{id:g.id,name:g.name,table:g.table||'',cat:g.cat||'Kawaida',code:g.code||g.id},event:{id:e.id,name:e.name,date:e.date,time:e.time||'',venue:e.venue,location:e.location||'',card:e.card||''},dr:S.dr});
+      ok++;markDone(g,t);
+    }catch(x){bad.push([g,x.message])}
+    await new Promise(r=>setTimeout(r,350));
+  }
+  S.sq=bad.map(b=>b[0].id);
+  if(!bad.length){S.sel=new Set();S.step=1;S.mev=null}
+  dlg(`<h3>${bad.length?'⚠ Imekamilika na makosa':'✅ Imetumwa'}</h3><p class="m">Imefanikiwa: ${ok} · Imefeli: ${bad.length}</p>${bad.slice(0,6).map(b=>`<p class="m">• ${E(b[0].name)}: ${E(b[1])}</p>`).join('')}${bad.length?'<button class="b" data-a="vretry">↻ Jaribu tena waliofeli</button>':''}`);
+  render();
+}
+
 /* ─── ACTIONS ─── */
 const A={
   setup(){
@@ -363,7 +437,7 @@ const A={
   login(){
     const u=DB.login(val('pin'));if(!u)return alert('PIN si sahihi. Jaribu tena.');
     S.u=u;S.eid=null;S.tab='dash';
-    try{sessionStorage.setItem('ngt_u',u.id)}catch(e){}render();
+    try{sessionStorage.setItem('ngt_u',u.id)}catch(e){}render();if(u.role==='admin')syncRsvp(true);
   },
   out(){S.u=null;S.eid=null;try{sessionStorage.removeItem('ngt_u')}catch(e){}render()},
   nav:d=>{S.eid=null;S.tab=d.k;S.q='';render();scrollTo(0,0)},
@@ -398,7 +472,7 @@ const A={
   },
   cancelorder:d=>{if(confirm('Kataa agizo hili?')){DB.setOrder(d.id,'cancelled');render()}},
   /* wageni – ndani ya tukio */
-  addg(){if(!val('g_n'))return alert('Weka jina la mgeni.');DB.addGuest(S.eid,val('g_n'),val('g_p'),{table:val('g_t')});render()},
+  addg(){addG(S.eid)&&render()},
   bulk(){alert(DB.importText(S.eid,val('g_bulk'))+' wageni wameongezwa.');render()},
   csvfile:(d,el)=>{const f=el.files[0];if(f){const r=new FileReader();r.onload=()=>{alert(DB.importText(S.eid,r.result)+' wageni wameongezwa.');render()};r.readAsText(f)}},
   delg:d=>{if(confirm('Futa mgeni huyu?')){DB.delGuest(d.id);render()}},
@@ -406,30 +480,55 @@ const A={
   gf:d=>{S.f=d.k;render()},
   gsel:d=>{S.sel.has(d.id)?S.sel.delete(d.id):S.sel.add(d.id);rf()},
   gsel2:d=>{S.sel.has(d.id)?S.sel.delete(d.id):S.sel.add(d.id);render()},
-  addg2(){if(!val('g_n'))return alert('Weka jina la mgeni.');DB.addGuest(curE().id,val('g_n'),val('g_p'),{table:val('g_t')});render()},
+  addg2(){addG(curE().id)&&render()},
   bulk2(){alert(DB.importText(curE().id,val('g_bulk'))+' wageni wameongezwa.');render()},
   csvfile2:(d,el)=>{const f=el.files[0];if(f){const r=new FileReader();r.onload=()=>{alert(DB.importText(curE().id,r.result)+' wageni wameongezwa.');render()};r.readAsText(f)}},
   delg2:d=>{if(confirm('Futa mgeni huyu?')){DB.delGuest(d.id);S.sel.delete(d.id);render()}},
   /* Tuma Mwaliko wizard */
-  tosend:()=>{const e=curE();S.mev=e.id;S.dr=ldDr(e);S.step=2;S.tab='send';render();scrollTo(0,0)},
-  sev:d=>{const e=DB.ev(d.id);S.mev=e.id;S.dr=ldDr(e);S.sel=new Set();S.step=2;render()},
-  sstep:d=>{if(d.k==='3'&&!S.sel.size)return alert('Chagua angalau mgeni mmoja.');S.step=+d.k;render();scrollTo(0,0)},
-  selu:()=>{S.sel=new Set(GS(S.mev).filter(g=>g.phone&&!g.sent).map(g=>g.id));render()},
-  sela:()=>{S.sel=new Set(GS(S.mev).filter(g=>g.phone).map(g=>g.id));render()},
+  tosend:()=>{const e=curE();S.mev=e.id;S.dr=ldDr(e);S.step=3;S.tab='send';render();scrollTo(0,0)},
+  sev:d=>{const e=DB.ev(d.id);S.mev=e.id;S.dr=ldDr(e);S.sel=defSel(e,S.dr.tpl||'mwaliko');S.step=2;render()},
+  sendev:()=>{const e=DB.ev(S.eid);S.mev=e.id;S.dr=ldDr(e);S.sel=defSel(e,S.dr.tpl||'mwaliko');S.step=2;S.eid=null;S.tab='send';render();scrollTo(0,0)},
+  stype:d=>{const e=DB.ev(S.mev),o=S.dr;S.dr=Object.assign(defDr(e,d.k),{map:o.map,pay:o.pay});S.sel=defSel(e,d.k);render()},
+  sstep:d=>{const k=+d.k;if(k>=2&&!S.mev)return;if(k===4&&!S.sel.size)return alert('Chagua angalau mgeni mmoja.');S.step=k;render();scrollTo(0,0)},
+  gsel2:d=>{S.sel.has(d.id)?S.sel.delete(d.id):S.sel.add(d.id);render()},
+  selu:()=>{S.sel=defSel(DB.ev(S.mev),S.dr.tpl||'mwaliko');render()},
+  sela:()=>{S.sel=new Set(GS(S.mev).filter(g=>ph(g.phone)).map(g=>g.id));render()},
   selc:()=>{S.sel=new Set();render()},
-  sdraft:()=>{try{localStorage.setItem('v4dr'+S.mev,JSON.stringify(S.dr));alert('✅ Draft imehifadhiwa.')}catch(x){alert('Draft haikuhifadhiwa.')}},
-  vsend0:()=>{
-    S.sq=GS(S.mev).filter(g=>S.sel.has(g.id)&&g.phone).map(g=>g.id);S.si=0;
-    if(!S.sq.length)return alert('Hakuna mgeni mwenye namba kwenye chaguo.');A.vq();
+  sdraft:()=>{try{localStorage.setItem('v4dr'+S.mev,JSON.stringify(S.dr));toast('✅ Draft imehifadhiwa')}catch(x){toast('Draft haikuhifadhiwa')}},
+  async vsend0(){
+    if(S.busy)return;
+    S.sq=GS(S.mev).filter(g=>S.sel.has(g.id)&&ph(g.phone)).map(g=>g.id);S.si=0;
+    if(!S.sq.length)return alert('Hakuna mgeni mwenye namba sahihi kwenye chaguo.');
+    if(KEY()){
+      if(!confirm('Itatuma ujumbe '+S.sq.length+' kupitia WhatsApp API. Gharama zinatozwa na Meta. Endelea?'))return;
+      S.busy=1;try{await apiRun()}finally{S.busy=0}
+    }else A.vq();
   },
+  vretry(){const d=$('#dg');if(d.open)d.close();if(S.busy)return;S.busy=1;apiRun().finally(()=>{S.busy=0})},
   vq:()=>{
     const g=gst(S.sq[S.si]);
-    if(!g){S.sel=new Set();S.step=1;S.mev=null;$('#dg').close();render();return alert('✅ Mialiko yote imeshughulikiwa.')}
+    if(!g){S.sel=new Set();S.step=1;S.mev=null;const d=$('#dg');if(d.open)d.close();render();return toast('✅ Mialiko yote imeshughulikiwa')}
+    const qr=S.dr.tpl==='qr';
     dlg(`<p class="m">${S.si+1} / ${S.sq.length}</p><h3>${E(g.name)}</h3><p class="m">📱 ${E(g.phone)}</p>
-    <div class="row" style="justify-content:center;margin-top:12px"><button class="b" data-a="vgo">💬 Tuma WhatsApp</button><button class="b o" data-a="vskip">Ruka →</button></div>`);
+    <div class="row" style="justify-content:center;margin-top:12px"><button class="b" data-a="vgo">${qr?'🖼 Tuma Kadi ya QR':'💬 Tuma WhatsApp'}</button><button class="b o" data-a="vskip">Ruka →</button></div>`);
   },
-  vgo:()=>{const g=gst(S.sq[S.si]);open('https://wa.me/'+U.phone(g.phone)+'?text='+encodeURIComponent(build(g)),'_blank');DB.markSent(g.id);S.si++;A.vq()},
+  vgo:()=>{
+    const g=gst(S.sq[S.si]),t=S.dr.tpl||'mwaliko';
+    if(t==='qr')tumaKadiYaQR(g.id,true);else open('https://wa.me/'+ph(g.phone)+'?text='+encodeURIComponent(build(g)),'_blank');
+    markDone(g,t);S.si++;A.vq();
+  },
   vskip:()=>{S.si++;A.vq()},
+  cyc:d=>{const g=gst(d.id);upd(g,{cat:CATS[(CATS.indexOf(g.cat||'Kawaida')+1)%CATS.length]});render()},
+  pay:d=>{const g=gst(d.id);upd(g,{paid:!g.paid});toast(g.paid?'💰 Amelipa':'Hajalipa');render()},
+  ef:d=>{S.ef=d.k;render()},
+  gall:()=>{gList().forEach(g=>S.sel.add(g.id));rf();toast('Wamechaguliwa '+S.sel.size)},
+  delsel:()=>{if(!S.sel.size||!confirm('Futa wageni '+S.sel.size+' waliochaguliwa?'))return;S.sel.forEach(id=>DB.delGuest(id));S.sel=new Set();render()},
+  gedit:d=>{const g=gst(d.id);dlg(`<h3>Hariri mgeni</h3><input id="e_n" value="${E(g.name)}" placeholder="Jina"><input id="e_p" type="tel" value="${E(g.phone||'')}" placeholder="0712..."><input id="e_t" value="${E(g.table||'')}" placeholder="Meza"><div class="row"><select id="e_c">${CATS.map(c=>`<option ${c===(g.cat||'Kawaida')?'selected':''}>${c}</option>`).join('')}</select><select id="e_x">${[1,2,3,4,5].map(n=>`<option value="${n}" ${n===(g.pax||1)?'selected':''}>${n}</option>`).join('')}</select></div><button class="b" data-a="gsave" data-id="${g.id}">💾 Hifadhi</button>`)},
+  gsave:d=>{const n=val('e_n').trim(),p=val('e_p').trim();if(!n)return alert('Jina linahitajika.');if(p&&!ph(p))return alert('Namba si sahihi.');upd(gst(d.id),{name:n,phone:p,table:val('e_t').trim(),cat:val('e_c'),pax:+val('e_x')||1});$('#dg').close();render()},
+  apikey(){const k=val('k_key').trim();if(k.length<8)return alert('Funguo angalau herufi 8.');try{localStorage.setItem('ngt_key',k)}catch(e){}toast('Funguo imehifadhiwa');render()},
+  apitest:async()=>{try{await api('/api/rsvp?ev=_');toast('✅ Muunganisho sawa')}catch(e){alert('Imeshindikana: '+e.message)}},
+  apiclear(){try{localStorage.removeItem('ngt_key')}catch(e){}render()},
+  rsvp:()=>syncRsvp(false),
   /* kadi */
   card:async d=>{
     const g=gst(d.id),e=DB.ev(g.eid);
@@ -459,8 +558,8 @@ const A={
     const e=DB.ev(S.eid),s=DB.stats(S.eid);
     U.dl('ripoti-'+e.name.replace(/\W+/g,'-')+'.csv',U.csv(
       [['RIPOTI YA TUKIO – '+e.name],['Tarehe ya Ripoti',new Date().toLocaleString('sw-TZ')],['Tukio',e.name],['Tarehe',e.date],['Mahali',e.venue],['Pakiti',e.pkg],[],
-       ['Walioalikwa',s.total],['Walioingia',s.in],['Wanasubiri',s.pending],['Asilimia',s.pct+'%'],[],['Jina','Namba','Meza','Hali','Saa ya Kuingia']]
-      .concat(GS(S.eid).map(g=>[g.name,g.phone,g.table||'',g.status==='in'?'Ameingia':'Hajaingia',g.status==='in'?T(g.at):'']))
+       ['Walioalikwa',s.total],['Walioingia',s.in],['Wanasubiri',s.pending],['Asilimia',s.pct+'%'],[],['Jina','Namba','Meza','Aina','Watu','Malipo','Hali','Saa ya Kuingia']]
+      .concat(GS(S.eid).map(g=>[g.name,g.phone,g.table||'',g.cat||'Kawaida',g.pax||1,g.paid?'Amelipa':'Hajalipa',g.status==='in'?'Ameingia':'Hajaingia',g.status==='in'?T(g.at):'']))
     ),'text/csv');
   },
   csv2:d=>{S.eid=d.id;A.csv();S.eid=null},
@@ -491,15 +590,17 @@ document.addEventListener('input',e=>{
   const id=e.target.id;
   if(id==='q'){S.q=e.target.value;const gt=$('#gt');if(gt)gt.innerHTML=S.u?.role==='staff'?rows2():rows()}
   else if(id==='gq'){S.gq=e.target.value;rf()}
-  else if(/^m_(title|body|map|close)$/.test(id)){
+  else if(/^m_(title|body|map|close|pay)$/.test(id)){
     S.dr[id.slice(2)]=e.target.value;
     const n=$('#'+id+'_n');if(n)n.textContent=e.target.value.length+'/'+e.target.maxLength;
-    const g=GS(S.mev).find(x=>S.sel.has(x.id))||{name:'Mgeni'},p=$('#pv');if(p)p.textContent=build(g);
+    const g=GS(S.mev).find(x=>S.sel.has(x.id))||{name:'Mgeni'},p=$('#pv');if(p)p.textContent=prevTxt(g);
   }
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='pin')A.login();if(e.key==='Enter'&&e.target.id==='code')A.code()});
 $('#dg').addEventListener('close',()=>{if(S.u&&S.eid&&S.u.role==='admin')try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows()}catch(e){}});
 render();
+if(S.u&&S.u.role==='admin')syncRsvp(true);
+setInterval(()=>{if(S.u&&S.u.role==='admin'&&KEY()&&!document.hidden&&!$('#dg').open)syncRsvp(true)},60000);
 
 /* ─── KADI YA QR (Amelipa) ─── */
 async function canvasToFile(canvas,jina){
@@ -512,12 +613,12 @@ async function shareFileUjumbe(file,ujumbe,simu){
   }
   window.open(`https://wa.me/${simu}?text=${encodeURIComponent(ujumbe)}`,'_blank');return false;
 }
-window.tumaKadiYaQR=async function(gId){
+window.tumaKadiYaQR=async function(gId,skip){
   const g=gst(gId),ev=g&&DB.ev(g.eid);
   if(!g)return alert('Mgeni hajapatikana');
-  if(!confirm(g.name+' amelipa mchango? Tuma Kadi ya QR?'))return;
+  if(!skip&&!confirm(g.name+' amelipa mchango? Tuma Kadi ya QR?'))return;
   const qr=new Image();qr.crossOrigin='anonymous';
-  qr.src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('NIALIKE-'+g.id+'-'+g.name)}`;
+  qr.src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(g.code||g.id)}`;
   qr.onload=async()=>{
     const cv=document.createElement('canvas');cv.width=800;cv.height=1100;
     const c=cv.getContext('2d');
@@ -531,7 +632,7 @@ window.tumaKadiYaQR=async function(gId){
     c.font='22px Arial';c.fillText('📍 '+ev.venue,400,680);
     const file=await canvasToFile(cv,'QR-'+g.name+'.png');
     const ujumbe=`Habari ${g.name}\nAsante! Malipo yamepokelewa ✅\nHii hapo juu ni Kadi yako ya kuingia yenye QR.\n📅 ${ev.date} | 📍 ${ev.venue}\nKuwa nayo siku ya tukio, utaionesha getini.\nKaribu Sana! - Nialike Go Tech`;
-    g.paid=true;if(typeof save==='function')save();
-    await shareFileUjumbe(file,ujumbe,U.phone(g.phone||g.p||''));
+    upd(g,{paid:true,qr:1});
+    await shareFileUjumbe(file,ujumbe,ph(g.phone||g.p||''));
   };
 };
