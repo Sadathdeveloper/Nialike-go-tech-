@@ -92,6 +92,9 @@ const rcHtml=()=>S.rc.length?`<div class="c"><h3>Scans za karibuni</h3>${S.rc.ma
 .st>div b{display:block;font-size:1.25rem;color:#fff;margin-bottom:2px}
 .sg{gap:6px!important}
 .evb{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}.evb .b{width:100%;text-align:center;justify-content:center}.evb .full{grid-column:1/-1}
+.evr{display:flex;gap:10px;padding:8px 0;border-top:.5px solid rgba(255,255,255,.07)}.evr>span{width:30px;height:30px;border-radius:9px;background:#0f2a1b;display:grid;place-items:center;flex:none}
+.evr b{display:block;font-weight:500}.evr small{color:#8aa394;font-size:.72rem;display:block}.evr a{color:#4ade80}
+.cdn{color:#facc15;font-size:.85rem;margin:2px 0 8px}.evn{background:#0f2a1b;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:.8rem;color:#b9cdbf}
 `;document.head.appendChild(s)})();
 
 /* ─── RENDER ─── */
@@ -324,14 +327,21 @@ function stats(){
   <div class="bar"><i style="width:${s.pct}%"></i></div>
   ${rsv()}<p class="m">${s.pct}% wamefika · Ilisasishwa ${new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'})}</p>`;
 }
+const fd=d=>{const x=new Date(d);return isNaN(x)?d:x.toLocaleDateString('sw-TZ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})};
 function vEvent(){
   const e=DB.ev(S.eid),adm=S.u.role==='admin',all=GS(S.eid),f=S.ef,n=k=>all.filter(g=>gFilter(g,k)).length;
   const chip=(k,l)=>`<a data-a="ef" data-k="${k}" class="${f===k?'on':''}">${l} (${n(k)})</a>`;
   return `<button class="b o s" data-a="back">← Rudi</button>
-  <h2>${E(e.name)}</h2>
-  <p class="m">📅 ${e.date} ${e.time} · 📍 ${E(e.venue)} · 📦 ${E(e.pkg)}</p><p class="m" style="color:#facc15">${days(e)}</p>
-  ${e.host?`<p class="m">👤 ${E(e.host)}</p>`:''}${e.contact?`<p class="m">📞 Mawasiliano: ${E(e.contact)}</p>`:''}
-  ${e.location?`<p class="m">📍 Location: <a href="${E(e.location)}" target="_blank">Fungua Ramani</a></p>`:''}${e.note?`<p class="m">📝 ${E(e.note)}</p>`:''}
+  <div class="v4c evi">
+    <div class="hi"><h2 style="margin:0">${E(e.name)}</h2>${e.type?`<span class="badge">${E(e.type)}</span>`:''}</div>
+    <div class="cdn">${days(e)}</div>
+    <div class="evr"><span>📅</span><div><b>${E(fd(e.date))}</b>${e.time?`<small>Saa ${E(e.time)}</small>`:''}</div></div>
+    <div class="evr"><span>📍</span><div><b>${E(e.venue)}</b>${e.location?`<small><a href="${E(e.location)}" target="_blank" rel="noopener">Fungua ramani →</a></small>`:''}</div></div>
+    ${e.host?`<div class="evr"><span>👤</span><div><b>${E(e.host)}</b><small>Mwenye shughuli</small></div></div>`:''}
+    ${e.contact?`<div class="evr"><span>📞</span><div><b><a href="tel:${E(String(e.contact).replace(/[^\d+]/g,''))}">${E(e.contact)}</a></b><small>Mawasiliano</small></div></div>`:''}
+    <div class="evr"><span>📦</span><div><b>${E(e.pkg)}</b><small>Pakiti · ${E(cardName(e))}</small></div></div>
+    ${e.note?`<div class="evn">📝 ${E(e.note)}</div>`:''}
+  </div>
   ${adm?`<div class="sg" style="margin:10px 0"><a>💰<b>${n('paid')}</b>Wamelipa</a><a>📨<b>${n('sent')}</b>Waliotumwa</a><a>⭐<b>${n('vip')}</b>VIP</a><a>👍<b>${all.filter(g=>g.rsvp==='yes').length}</b>Wanashiriki</a></div>`:''}
   <div id="stats">${stats()}</div>
   <div class="evb">
