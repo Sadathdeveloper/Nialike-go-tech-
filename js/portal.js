@@ -87,26 +87,26 @@ const rcHtml=()=>S.rc.length?`<div class="c"><h3>Scans za karibuni</h3>${S.rc.ma
 .nx{background:linear-gradient(135deg,#14532d,#0b1d13)}.nx b{font-size:1.1rem}.nx .cd{color:#facc15;font-size:.85rem;margin-top:4px}
 .rc{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.8rem}
 .opt{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;margin-bottom:8px;cursor:pointer;background:#0b1d13;display:flex;gap:10px;align-items:center}.opt.on{border:2px solid #22c55e;padding:9px}
+.st{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:10px 0}
+.st>div,.sg>a{background:#0f2a1b!important;border:.5px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 2px!important;text-align:center;font-size:.68rem;color:#b9cdbf;min-width:0}
+.st>div b{display:block;font-size:1.25rem;color:#fff;margin-bottom:2px}
+.sg{gap:6px!important}
+.evb{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:14px}.evb .b{width:100%;text-align:center;justify-content:center}.evb .full{grid-column:1/-1}
 `;document.head.appendChild(s)})();
 
 /* ─── RENDER ─── */
 function render(){
   stop();X.apply();const a=$('#app');
- 
-      if(!DB.d.users.some(u=>u.role==='admin')){
-    if(location.search.includes('master=NIALIKE2024')){
-      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
-        <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
-        <input id="s_name" placeholder="Jina lako kamili">
-        <input id="s_pin" type="password" inputmode="numeric" placeholder="PIN (tarakimu 4–8)">
-        <input id="s_pin2" type="password" inputmode="numeric" placeholder="Rudia PIN">
-        <button class="b full" data-a="setup">Tengeneza akaunti ya Admin</button></div>`;return;
+  if(!DB.d.users.some(u=>u.role==='admin')){
+    if(!location.search.includes('master=NIALIKE2024')){
+      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div><p class="m" style="color:#f87171">⛔ System imefungwa. Wasiliana na Admin mkuu.</p></div>`;return;
     }
     a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
-      <p class="m">Ingiza PIN yako</p>
-      <p class="m" style="margin-bottom:8px;font-size:.7rem">Admin · Msimamizi wa Mlango · Mteja</p>
-      <input id="pin" type="password" inputmode="numeric" placeholder="••••••" autofocus>
-      <button class="b full" data-a="login">Ingia</button></div>`;return;
+      <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
+      <input id="s_name" placeholder="Jina lako kamili">
+      <input id="s_pin" type="password" inputmode="numeric" placeholder="PIN (tarakimu 4–8)">
+      <input id="s_pin2" type="password" inputmode="numeric" placeholder="Rudia PIN">
+      <button class="b full" data-a="setup">Tengeneza akaunti ya Admin</button></div>`;return;
   }
   if(!S.u){
     a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
@@ -334,8 +334,8 @@ function vEvent(){
   ${e.location?`<p class="m">📍 Location: <a href="${E(e.location)}" target="_blank">Fungua Ramani</a></p>`:''}${e.note?`<p class="m">📝 ${E(e.note)}</p>`:''}
   ${adm?`<div class="sg" style="margin:10px 0"><a>💰<b>${n('paid')}</b>Wamelipa</a><a>📨<b>${n('sent')}</b>Waliotumwa</a><a>⭐<b>${n('vip')}</b>VIP</a><a>👍<b>${all.filter(g=>g.rsvp==='yes').length}</b>Wanashiriki</a></div>`:''}
   <div id="stats">${stats()}</div>
-  <div class="row" style="margin-top:14px">
-    ${adm?`<button class="b" data-a="sendev">✈ Tuma Mialiko</button>`:''}
+  <div class="evb">
+    ${adm?`<button class="b full" data-a="sendev">✈ Tuma Mialiko</button>`:''}
     <button class="b o" data-a="csv">⬇ CSV Ripoti</button><button class="b o" onclick="print()">🖨 Print</button>
     <button class="b o" data-a="expev">⬇ Pack (Sync)</button>
     <label class="b o" style="cursor:pointer">⬆ Ingiza Pack<input type="file" accept=".json" hidden data-a="impfile"></label>
