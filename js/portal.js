@@ -40,7 +40,8 @@ const addG=eid=>{
   if(g&&g.id)X.set(g.id,{cat:c,pax:x});return true;
 };
 const markDone=(g,t)=>{if(t==='mwaliko')DB.markSent(g.id);else if(t==='qr'){DB.markSent(g.id);upd(g,{qr:1})}else if(t==='kumbusho')upd(g,{rem:1});else upd(g,{thx:1})};
-const days=e=>{const n=Math.ceil((new Date(e.date)-new Date().setHours(0,0,0,0))/864e5);return isNaN(n)?'':n>0?'⏳ Siku '+n+' zimebaki':n===0?'🎉 Leo ndio siku!':'Limepita'};
+const ld=d=>new Date(String(d).length===10?d+'T00:00:00':d);
+const days=e=>{const n=Math.ceil((ld(e.date)-new Date().setHours(0,0,0,0))/864e5);return isNaN(n)?'':n>0?'⏳ Siku '+n+' zimebaki':n===0?'🎉 Leo ndio siku!':'Limepita'};
 const rcHtml=()=>S.rc.length?`<div class="c"><h3>Scans za karibuni</h3>${S.rc.map(x=>`<div class="rc"><span>${E(x.n)}</span><span>${x.r==='ok'?'✅':'⚠'} ${T(x.t)}</span></div>`).join('')}</div>`:'';
 
 /* ─── CSS ─── */
@@ -150,7 +151,7 @@ function vDash(){
   const sg=[['📅',ev.length,'Matukio','events'],['👥',gs.length,'Wageni','guests'],['📨',gs.filter(g=>g.sent).length,'Waliotumwa','guests'],['💰',gs.filter(g=>g.paid).length,'Wamelipa','guests'],['⏳',gs.length-inn,'Wanasubiri','guests'],['✅',inn,'Wameingia','report'],['⭐',gs.filter(g=>g.cat==='VIP').length,'VIP','guests'],['👍',gs.filter(g=>g.rsvp==='yes').length,'Wanashiriki','guests']];
   const qa=[['🗓','Tukio Jipya','events'],['➕','Ongeza Mgeni','guests'],['✈️','Tuma Mwaliko','send'],['📷','Scan QR','events'],['📊','Ripoti','report'],['📦','Maagizo','orders'],['👤','Watumiaji','users'],['⚙️','Mipangilio','sync']];
   return `<div class="v4c hi"><div><small class="m">Karibu tena,</small><h2>${E(S.u.name)} <span class="badge">SUPER ADMIN</span></h2></div><small class="m">${new Date().toLocaleDateString('sw-TZ',{weekday:'long',day:'numeric',month:'short',year:'numeric'})}</small></div>
-  ${nx?`<div class="v4c nx" data-a="open" data-id="${nx.id}" style="cursor:pointer"><small class="m">Tukio linalofuata</small><br><b>${E(nx.name)}</b><p class="m">📅 ${nx.date} ${nx.time||''} · 📍 ${E(nx.venue)}</p><div class="cd">${days(nx)}</div></div>`:''}
+  ${nx?`<div class="v4c nx" data-a="open" data-id="${nx.id}" style="cursor:pointer"><small class="m">Tukio linalofuata</small><br><b>${E(nx.name)}</b><p class="m">📅 ${E(fd(nx.date))}${nx.time?' · '+E(nx.time):''} · 📍 ${E(nx.venue)}</p><div class="cd">${days(nx)}</div></div>`:''}
   <div class="v4c"><h3>Muhtasari wa Haraka</h3><div class="sg">${sg.map(x=>`<a data-a="nav" data-k="${x[3]}">${x[0]}<b>${x[1]}</b>${x[2]}</a>`).join('')}</div></div>
   <div class="v4c"><h3>Vitendo vya Haraka</h3><div class="qa">${qa.map(x=>`<a data-a="nav" data-k="${x[2]}"><span>${x[0]}</span>${x[1]}</a>`).join('')}</div></div>
   <div class="v4c"><h3>Matukio ya Hivi Punde</h3>${ev.slice(-3).reverse().map(e=>{const s=DB.stats(e.id);return `<div class="ev4" data-a="open" data-id="${e.id}"><div class="t"><b>${E(e.name)}</b><span class="m">${E(e.date)}</span></div><small>📍 ${E(e.venue)} · 📦 ${E(e.pkg)}</small><div class="bar"><i style="width:${s.pct}%"></i></div><div class="fo"><span>👥 ${s.total} walioalikwa</span><span>✓ ${s.in} walioingia</span><span>${s.pct}%</span></div></div>`}).join('')||'<p class="m">Hakuna tukio bado. Bofya "Tukio Jipya".</p>'}</div>`;
@@ -209,7 +210,7 @@ function vGuests(){
 /* ─── ADMIN: TUMA MWALIKO (wizard: Tukio → Aina → Wapokeaji → Ujumbe) ─── */
 const TY={mwaliko:['✉️','Mwaliko wa kawaida','Kadi na maelezo ya tukio, pamoja na jibu la kushiriki.'],qr:['🔳','Mwaliko wenye QR','Kadi ya kuingia yenye QR kwa waliolipa.'],kumbusho:['🔔','Kumbusho','Kukumbusha wageni kabla ya siku ya tukio.'],asante:['🙏','Asante','Shukrani kwa waliohudhuria.']};
 const defDr=(e,t='mwaliko')=>{
-  const N=String(e.name).toUpperCase(),w=`tarehe ${e.date}, ${e.venue}, SAA ${e.time||''}`;
+  const N=String(e.name).trim().toUpperCase(),w=`tarehe ${fd(e.date)}, ${e.venue}, SAA ${e.time||''}`;
   const m={mwaliko:['Habari {JINA}!',`Tafadhali pokea mwaliko wa ${N}, itakayofanyika ${w}.`,'Karibu sana na uwe na wakati mwema!'],
     qr:['Habari {JINA}!',`Asante! Malipo yamepokelewa. Hii ni kadi yako ya kuingia kwa ${N}, ${w}. Kuwa nayo siku ya tukio, utaionesha getini.`,'Karibu sana!'],
     kumbusho:['Habari {JINA}, kumbusho!',`Tunakukumbusha kuhusu ${N} itakayofanyika ${w}. Tafadhali fika mapema.`,'Tunakusubiri kwa hamu!'],
@@ -218,7 +219,7 @@ const defDr=(e,t='mwaliko')=>{
 };
 const ldDr=e=>{try{return Object.assign(defDr(e),JSON.parse(localStorage.getItem('v4dr'+e.id))||{})}catch(x){return defDr(e)}};
 const defSel=(e,t)=>new Set(GS(e.id).filter(g=>ph(g.phone)&&(t==='qr'?g.paid:t==='asante'?g.status==='in':t==='kumbusho'?g.rsvp!=='no':!g.sent)).map(g=>g.id));
-const build=(g,api)=>{const d=S.dr,t=d.tpl||'mwaliko';return `${(d.title||'').replace(/\{JINA\}/g,g.name)}\n\n${d.body||''}\n\n${d.map?'Ramani ya kufika ukumbini:\n📍 '+d.map+'\n\n':''}${d.pay&&t!=='asante'?'💳 Michango/Malipo: '+d.pay+'\n\n':''}${d.close||''}${t==='mwaliko'&&!api?`\n\nUtaweza kushiriki?\n✅ Nitashiriki: ${rl('yes',g)}\n❌ Sitashiriki: ${rl('no',g)}`:''}`};
+const build=(g,api)=>{const d=S.dr,t=d.tpl||'mwaliko';return `${(d.title||'').replace(/\{JINA\}/g,g.name)}\n\n${d.body||''}\n\n${d.map?'Ramani ya kufika ukumbini:\n📍 '+d.map+'\n\n':''}${d.pay&&t!=='asante'?'💳 Michango/Malipo: '+d.pay+'\n\n':''}${d.close||''}`};
 const prevTxt=g=>build(g,!!KEY());
 const modeNote=()=>`<p class="m" style="margin:8px 0">${KEY()?'⚡ Kutuma kiotomatiki kupitia WhatsApp API, na vitufe vya Nitashiriki / Sitashiriki.':'✋ Kutuma kwa mkono: WhatsApp inafunguka kwa kila mgeni. Weka funguo ya API kwenye Mipangilio ili kutuma kiotomatiki.'}</p>`;
 function vSend(){
@@ -327,7 +328,7 @@ function stats(){
   <div class="bar"><i style="width:${s.pct}%"></i></div>
   ${rsv()}<p class="m">${s.pct}% wamefika · Ilisasishwa ${new Date().toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'})}</p>`;
 }
-const fd=d=>{const x=new Date(d);return isNaN(x)?d:x.toLocaleDateString('sw-TZ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})};
+const fd=d=>{const x=ld(d);return isNaN(x)?d:x.toLocaleDateString('sw-TZ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})};
 function vEvent(){
   const e=DB.ev(S.eid),adm=S.u.role==='admin',all=GS(S.eid),f=S.ef,n=k=>all.filter(g=>gFilter(g,k)).length;
   const chip=(k,l)=>`<a data-a="ef" data-k="${k}" class="${f===k?'on':''}">${l} (${n(k)})</a>`;
