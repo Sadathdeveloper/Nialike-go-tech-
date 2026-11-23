@@ -92,16 +92,21 @@ const rcHtml=()=>S.rc.length?`<div class="c"><h3>Scans za karibuni</h3>${S.rc.ma
 /* ─── RENDER ─── */
 function render(){
   stop();X.apply();const a=$('#app');
-  if(!DB.d.users.some(u=>u.role==='admin')){
-    if(!location.search.includes('master=NIALIKE2024')){
-      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div><p class="m" style="color:#f87171">⛔ System imefungwa. Wasiliana na Admin mkuu.</p></div>`;return;
+ 
+      if(!DB.d.users.some(u=>u.role==='admin')){
+    if(location.search.includes('master=NIALIKE2024')){
+      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
+        <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
+        <input id="s_name" placeholder="Jina lako kamili">
+        <input id="s_pin" type="password" inputmode="numeric" placeholder="PIN (tarakimu 4–8)">
+        <input id="s_pin2" type="password" inputmode="numeric" placeholder="Rudia PIN">
+        <button class="b full" data-a="setup">Tengeneza akaunti ya Admin</button></div>`;return;
     }
     a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
-      <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
-      <input id="s_name" placeholder="Jina lako kamili">
-      <input id="s_pin" type="password" inputmode="numeric" placeholder="PIN (tarakimu 4–8)">
-      <input id="s_pin2" type="password" inputmode="numeric" placeholder="Rudia PIN">
-      <button class="b full" data-a="setup">Tengeneza akaunti ya Admin</button></div>`;return;
+      <p class="m">Ingiza PIN yako</p>
+      <p class="m" style="margin-bottom:8px;font-size:.7rem">Admin · Msimamizi wa Mlango · Mteja</p>
+      <input id="pin" type="password" inputmode="numeric" placeholder="••••••" autofocus>
+      <button class="b full" data-a="login">Ingia</button></div>`;return;
   }
   if(!S.u){
     a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
