@@ -193,39 +193,6 @@
 <dialog id="dg"><div id="dgb"></div><button class="btn sm" onclick="this.parentElement.close()">OK</button></dialog>
 <a id="up" href="#home" aria-label="Top"><svg class="ic"><use href="#i-up"/></svg></a>
 <a class="wa" href="https://wa.me/255692081628" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="ic"><use href="#i-wa"/></svg></a>
-<script>
-// === FIX: Zuia Hitilafu na Portal kabisa ===
-(function(){
-  const oldAlert = window.alert;
-  window.alert = function(msg){
-    const m = String(msg||'').toLowerCase();
-    if(m.includes('hitilafu') || m.includes('hakuna mtandao') || m.includes('no connection')){
-      console.log('[Nialike] Hitilafu imezuiwa');
-      return;
-    }
-    return oldAlert.apply(window, arguments);
-  };
-  try{
-    
-    localStorage.setItem('ngt_role','mteja');
-    localStorage.removeItem('ngt_tok');
-  }catch(e){}
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.getRegistrations().then(regs=>{
-      regs.forEach(r=>{ r.unregister(); });
-    });
-  }
-})();
-// FIX: Tambua admin kutoka portal
-if(localStorage.getItem('isAdmin')==='true' || localStorage.getItem('ngt_tok')==='admin-ok'){
-  localStorage.setItem('ngt_role','admin');
-  // Lazimisha kuonyesha dashboard ya admin, si ya mteja
-  if(location.hash==='#admin' || localStorage.getItem('isAdmin')){
-    // hapa code yako ya kuonyesha admin panel ipo
-    console.log('ADMIN MODE ACTIVE - Moyo wa system');
-  }
-}
-</script>
 <script src="js/config.js"></script>
 <script src="store.js"></script>
 <script src="portal-v4.js"></script>
