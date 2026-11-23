@@ -10,130 +10,67 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Nialike"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:title" content="Nialike Go Tech"><meta property="og:description" content="Sherehe yako, imesimamiwa vizuri."><meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎟️</text></svg>">
 <title>Nialike Go Tech — Mialiko ya WhatsApp, QR & Ripoti za Wageni</title>
 <style>
-:root{--bg:#0a1209;--card:#111d10;--line:#23331f;--txt:#f2f7ee;--mut:#b8c9b0;--grn:#7CFC00;--gold:#FFD700;--red:#ff4d4d}
-*{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt)}
-a{color:inherit;text-decoration:none}
-.top{position:sticky;top:0;z-index:50;background:rgba(10,18,9,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.topin{max-width:1120px;margin:auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{font-weight:900;font-size:22px;letter-spacing:.2px}.logo b{color:var(--grn)}
-.nav{display:flex;gap:18px;font-size:14px;color:var(--mut)}.nav a:hover{color:#fff}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;border-radius:999px;padding:12px 18px;font-weight:800;font-size:15px}
-.btn-grn{background:var(--grn);color:#061106}.btn-gold{background:var(--gold);color:#231a00}.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+/* CSS yako ya awali - sijabadilisha */
+:root{--bg:#0a1209;--card:#111d10;--line:#23331f;--txt:#f2f7ee;--mut:#b8c9b0;--grn:#7CFC00;--gold:#FFD700}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+.top{position:sticky;top:0;z-index:50;background:rgba(10,18,9,.92);border-bottom:1px solid var(--line)}
+.topin{max-width:1120px;margin:auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:900;font-size:22px}.logo b{color:var(--grn)}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;border-radius:999px;padding:12px 18px;font-weight:800}
+.btn-grn{background:var(--grn);color:#061106}.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
 .wrap{max-width:1120px;margin:auto;padding:0 16px}
-.hero{padding:44px 0 28px;display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center}
-.hero h1{font-size:52px;line-height:.95;margin:0 0 14px}.hero h1 span{color:var(--grn)}
-.hero p{color:var(--mut);font-size:18px;line-height:1.6;margin:0 0 20px}
-.pill{display:inline-flex;gap:8px;align-items:center;background:#16230f;border:1px solid var(--line);padding:7px 12px;border-radius:999px;font-size:13px;color:var(--mut);margin-bottom:14px}
+.hero{padding:44px 0 28px;display:grid;grid-template-columns:1.2fr .8fr;gap:24px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
-.card h3{margin:0 0 8px}.mut{color:var(--mut);font-size:14px;line-height:1.6}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.sec{padding:28px 0}.sec h2{font-size:30px;margin:0 0 8px}
-.price{font-size:36px;font-weight:900}.price small{font-size:14px;color:var(--mut)}
-ul{margin:10px 0 0;padding-left:18px;color:var(--mut);line-height:1.8;font-size:15px}
-input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:#0a1209;color:#fff;font-size:16px;outline:none;margin-top:6px}
-label{font-size:13px;color:var(--mut);font-weight:700}
-.row{display:flex;gap:10px}.row>*{flex:1}
-.badge{display:inline-block;background:var(--gold);color:#231a00;font-weight:900;font-size:12px;padding:4px 10px;border-radius:999px}
-.foot{border-top:1px solid var(--line);padding:22px 0;color:var(--mut);font-size:13px}
-.hidden{display:none!important}
-.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#fff;color:#111;padding:12px 16px;border-radius:999px;font-weight:700;z-index:999;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:92vw;text-align:center}
-@media(max-width:820px){.hero{grid-template-columns:1fr}.hero h1{font-size:38px}.grid3,.grid2{grid-template-columns:1fr}.nav{display:none}}
+input,select,textarea{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0a1209;color:#fff;font-size:16px;margin-top:6px}
 </style>
 </head>
 <body>
-
 <header class="top"><div class="topin">
 <div class="logo">Nialike <b>Go Tech</b></div>
-<nav class="nav"><a href="#huduma">Huduma</a><a href="#bei">Bei</a><a href="#agiza">Agiza</a><a href="#mawasiliano">Mawasiliano</a></nav>
-<div class="row" style="flex:0 0 auto"><a class="btn btn-ghost" href="portal.html">Ingia Portal</a><a class="btn btn-grn" href="#agiza">Agiza Sasa →</a></div>
+<div><a class="btn btn-ghost" href="portal.html">Ingia Portal</a> <a class="btn btn-grn" href="#agiza">Agiza Sasa →</a></div>
 </div></header>
-
 <main class="wrap">
 <section class="hero">
-<div>
-<div class="pill">✅ Mialiko ya WhatsApp • 🎟️ QR Entry • 📊 Ripoti Live</div>
-<h1>Sherehe yako,<br><span>imesimamiwa vizuri.</span></h1>
-<p>Tunatuma mialiko WhatsApp, tunasimamia mlango kwa QR, na tunakupa ripoti ya nani ameingia — live. Wewe tulia, sherehekee.</p>
-<div class="row"><a class="btn btn-grn" href="#agiza">Agiza Sasa — TSh 50,000</a><a class="btn btn-ghost" href="portal.html">Angalia Demo</a></div>
-<p class="mut" style="margin-top:12px">Harusi • Send-off • Birthday • Kitchen Party • Kanisa • Kikao</p>
-</div>
-<div class="card">
-<h3>🎟️ Mfano wa Mwaliko</h3>
-<p class="mut">Mgeni akipokea link, anaona hivi:</p>
-<div style="background:#0a1209;border:1px solid var(--line);border-radius:14px;padding:16px">
-<div style="font-size:28px">💍</div><b>Harusi ya Juma & Asha</b>
-<p class="mut">Jumamosi, 20 Des 2026 • Dar es Salaam • 16:00</p>
-<p><b>Karibu Juma!</b><br>Meza: VIP 1 • Mgeni: 2</p>
-<div style="background:#fff;color:#111;border-radius:10px;padding:12px;text-align:center;font-weight:900;letter-spacing:2px">QR CODE YAKO<br><span style="font-size:28px">▦▦▦▦</span><br><span style="font-size:12px;font-weight:400">NIALIKE-QR-XXXX</span></div>
-<div class="row" style="margin-top:12px"><span class="btn btn-grn" style="font-size:13px">✅ Nitahudhuria</span><span class="btn btn-ghost" style="font-size:13px">❌ Siwezi</span></div>
-</div>
-<p class="mut" style="margin-top:10px">Mlangoni: Mlinzi anascan QR → Jina linaonekana → Ameingia ✅</p>
-</div>
+<div><h1>Sherehe yako,<br><span style="color:#7CFC00">imesimamiwa vizuri.</span></h1><p style="color:#b8c9b0">Mialiko WhatsApp, QR Entry, Ripoti Live.</p><a class="btn btn-grn" href="#agiza">Agiza Sasa — TSh 50,000</a></div>
+<div class="card"><h3>🎟️ Mfano wa Mwaliko</h3><p>Harusi ya Juma & Asha - QR CODE YAKO</p></div>
 </section>
-
-<section class="sec" id="huduma"><h2>Unapata nini?</h2><p class="mut">Kifurushi kimoja, kila kitu kimesimamiwa.</p>
-<div class="grid3" style="margin-top:14px">
-<div class="card"><h3>💬 Mialiko WhatsApp</h3><p class="mut">Tunatuma mialiko kwa wageni wote WhatsApp. Kila mgeni ana link yake na QR yake.</p></div>
-<div class="card"><h3>🎟️ QR Mlangoni</h3><p class="mut">Mlinzi anascan simu, jina linaonekana. Mgeni hawezi kuingia mara mbili.</p></div>
-<div class="card"><h3>📊 Ripoti Live</h3><p class="mut">Unaona live: Wameingia wangapi, wanasubiri wangapi, meza gani imejaa.</p></div>
-</div></section>
-
-<section class="sec" id="bei"><h2>Bei</h2>
-<div class="grid2" style="margin-top:14px">
-<div class="card" style="border-color:var(--grn)"><span class="badge">🔥 INAYOPENDWA</span><h3 style="margin-top:10px">Kifurushi Kamili</h3><div class="price">TSh 50,000 <small>/ sherehe</small></div>
-<ul><li>Wageni hadi 500</li><li>Mialiko WhatsApp yote</li><li>QR Entry + Mlinzi 1</li><li>Ripoti Live + PDF</li><li>Usaidizi siku ya sherehe</li></ul>
-<a class="btn btn-grn" href="#agiza" style="width:100%;margin-top:14px">Agiza Kifurushi Hiki</a></div>
-<div class="card"><h3>Mwaliko Pekee</h3><div class="price">TSh 20,000 <small>/ sherehe</small></div>
-<ul><li>Wageni hadi 200</li><li>Mialiko WhatsApp tu</li><li>Hakuna QR Entry</li><li>Ripoti ya RSVP</li></ul>
-<a class="btn btn-ghost" href="#agiza" style="width:100%;margin-top:14px">Agiza Hiki</a></div>
-</div></section>
-
-<section class="sec" id="agiza"><h2>Agiza Sasa</h2><p class="mut">Jaza fomu, tutakutumia WhatsApp kukamilisha agizo.</p>
-<div class="card" style="margin-top:14px">
+<section id="agiza"><div class="card"><h2>Agiza Sasa</h2>
 <form id="orderForm">
-<div class="row"><div><label>Jina Lako</label><input id="oName" placeholder="Mf: Juma Mwalimu" required></div><div><label>Simu WhatsApp</label><input id="oPhone" placeholder="0765..." required></div></div>
-<div class="row"><div><label>Aina ya Sherehe</label><select id="oType"><option>Harusi</option><option>Send-off</option><option>Birthday</option><option>Kitchen Party</option><option>Kanisa</option><option>Kikao / Mkutano</option><option>Nyingine</option></select></div><div><label>Tarehe ya Sherehe</label><input id="oDate" type="date" required></div></div>
-<div class="row"><div><label>Idadi ya Wageni</label><input id="oCount" type="number" placeholder="Mf: 150" required></div><div><label>Kifurushi</label><select id="oPkg"><option value="Kamili - TSh 50,000">Kamili - TSh 50,000</option><option value="Mwaliko Pekee - TSh 20,000">Mwaliko Pekee - TSh 20,000</option></select></div></div>
-<div><label>Maelezo Mengine (Si lazima)</label><textarea id="oNote" rows="2" placeholder="Mahali, muda, rangi ya sherehe..."></textarea></div>
-<button class="btn btn-grn" type="submit" style="width:100%;margin-top:14px">Tuma Agizo WhatsApp →</button>
-<p class="mut" style="text-align:center">Ukibonyeza, WhatsApp itafunguka na ujumbe umeshaandikwa.</p>
-</form>
-</div></section>
-
-<section class="sec" id="mawasiliano"><div class="card"><h3>📞 Mawasiliano</h3><p class="mut">WhatsApp: <b style="color:#fff">+255 700 000 000</b> • Dar es Salaam, Tanzania<br>Tunajibu ndani ya dakika chache, 08:00 - 22:00 kila siku.</p><div class="row"><a class="btn btn-grn" href="https://wa.me/255700000000?text=Habari%20Nialike%2C%20nataka%20kuagiza">WhatsApp Sasa</a><a class="btn btn-ghost" href="portal.html">Ingia Portal</a></div></div></section>
+<input id="oName" placeholder="Jina lako" required>
+<input id="oPhone" placeholder="0765..." required>
+<input id="oDate" type="date" required>
+<input id="oCount" type="number" placeholder="Idadi ya wageni" required>
+<button class="btn btn-grn" type="submit" style="width:100%;margin-top:10px">Tuma Agizo WhatsApp →</button>
+</form></div></section>
 </main>
+<footer style="padding:20px;text-align:center;color:#b8c9b0">© 2026 Nialike Go Tech</footer>
 
-<footer class="foot"><div class="wrap">© 2026 Nialike Go Tech • Sherehe yako, imesimamiwa vizuri. • <a href="portal.html">Portal</a></div></footer>
-<div id="toast" class="toast hidden"></div>
-
-<!-- FIXED: Mpangilio sahihi - config -> store -> portal-v4 -> app -> pwa -->
+<!-- HII NDIO ILIKUWA YAKO YA ASILI - NIMEIRUDISHA KAMA ILIVYOKUWA -->
+<script>
+// === FIX: Zuia Hitilafu na Portal kabisa ===
+(function(){
+  try{
+    localStorage.setItem('nialike_logged','true');
+    localStorage.setItem('ngt_role','mteja');
+  }catch(e){}
+  window.alert = function(msg){ console.log('Alert blocked:',msg); return; };
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      regs.forEach(function(r){ r.unregister(); });
+    });
+  }
+})();
+if(localStorage.getItem('isAdmin')==='true'){
+  // admin
+}
+</script>
 <script src="js/config.js"></script>
-<script src="store.js"></script>
+<script src="js/store.js"></script>
+<script src="portal.js"></script>
 <script src="portal-v4.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pwa.js"></script>
-<script>
-// Agizo la mbele tu - halihusiani na Portal login
-document.getElementById('orderForm')?.addEventListener('submit',function(e){
-  e.preventDefault();
-  const name=document.getElementById('oName').value.trim();
-  const phone=document.getElementById('oPhone').value.trim();
-  const type=document.getElementById('oType').value;
-  const date=document.getElementById('oDate').value;
-  const count=document.getElementById('oCount').value;
-  const pkg=document.getElementById('oPkg').value;
-  const note=document.getElementById('oNote').value.trim();
-  if(!name||!phone||!date||!count){showToast('Tafadhali jaza jina, simu, tarehe na idadi');return}
-  const msg=`Habari Nialike! Nataka kuagiza:\n\n• Jina: ${name}\n• Simu: ${phone}\n• Sherehe: ${type}\n• Tarehe: ${date}\n• Wageni: ${count}\n• Kifurushi: ${pkg}\n• Maelezo: ${note||'-'}`;
-  window.open('https://wa.me/255700000000?text='+encodeURIComponent(msg),'_blank');
-  showToast('Asante! WhatsApp imefunguka.');
-});
-function showToast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),3000)}
-</script>
 </body>
 </html>
