@@ -1,9 +1,15 @@
-/* PORTAL v4 – Admin (muonekano mpya) / Staff (QR Scanner) / Client – faili moja safi */
+/* PORTAL v4 – FIXED – Admin / Staff (QR Scanner) / Client */
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CARDS=['Blush Floral QR','Lace & Ribbon','Golden Rose','Ivory & Emerald','Emerald Heritage','Forest Duo','Crimson Romance'];
 const S={u:null,eid:null,tab:'dash',q:'',gev:null,f:'all',gq:'',sel:new Set(),step:1,mev:null,dr:{},sq:[],si:0,ef:'all',rc:[]};
 let stream=null,timer=null,last='',lastAt=0;
-try{const i=sessionStorage.getItem('ngt_u');if(i)S.u=DB.user(i)}catch(e){}
+// FIX: Usimwamini user wa local pekee bila PIN ya server
+try{
+  const i=sessionStorage.getItem('ngt_u');
+  const p=sessionStorage.getItem('ngt_pin');
+  if(i && p) S.u=DB.user(i);
+  else S.u=null;
+}catch(e){S.u=null}
 const T=t=>t?new Date(t).toLocaleTimeString('sw-TZ',{hour:'2-digit',minute:'2-digit'}):'—';
 const D=t=>t?new Date(t).toLocaleDateString('sw-TZ'):'—';
 const val=id=>($('#'+id)||{}).value||'';
@@ -101,16 +107,15 @@ const rcHtml=()=>S.rc.length?`<div class="c"><h3>Scans za karibuni</h3>${S.rc.ma
 /* ─── RENDER ─── */
 function render(){
   stop();X.apply();const a=$('#app');
-  if(!DB.d.users.some(u=>u.role==='admin')){
-    if(!location.search.includes('master=NIALIKE2024')){
-      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div><p class="m" style="color:#f87171">⛔ System imefungwa. Wasiliana na Admin mkuu.</p></div>`;return;
-    }
+  // FIX: Usiangalie local cache pekee. Kama master link ipo, onyesha setup. Kama sio master, onyesha login ambayo itaenda server.
+  if(location.search.includes('master=NIALIKE2024') && !S.u){
     a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
       <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
       <input id="s_name" placeholder="Jina lako kamili">
       <input id="s_pin" type="password" inputmode="numeric" placeholder="PIN (tarakimu 4–8)">
       <input id="s_pin2" type="password" inputmode="numeric" placeholder="Rudia PIN">
-      <button class="b full" data-a="setup">Tengeneza akaunti ya Admin</button></div>`;return;
+      <button class="b full" data-a="setup">Tengeneza akaunti ya Admin</button>
+      <p class="m" style="margin-top:10px"><a href="portal.html" style="color:#4ade80">Nina PIN tayari - Ingia</a></p></div>`;return;
   }
   if(!S.u){
     a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
@@ -207,7 +212,7 @@ function vGuests(){
   <div class="sb" id="sb" ${S.sel.size?'':'hidden'}>${sbar()}</div>`;
 }
 
-/* ─── ADMIN: TUMA MWALIKO (wizard: Tukio → Aina → Wapokeaji → Ujumbe) ─── */
+/* ─── ADMIN: TUMA MWALIKO ─── */
 const TY={mwaliko:['✉️','Mwaliko wa kawaida','Kadi na maelezo ya tukio, pamoja na jibu la kushiriki.'],qr:['🔳','Mwaliko wenye QR','Kadi ya kuingia yenye QR kwa waliolipa.'],kumbusho:['🔔','Kumbusho','Kukumbusha wageni kabla ya siku ya tukio.'],asante:['🙏','Asante','Shukrani kwa waliohudhuria.']};
 const defDr=(e,t='mwaliko')=>{
   const N=String(e.name).trim().toUpperCase(),w=`tarehe ${fd(e.date)}, ${e.venue}, SAA ${e.time||''}`;
@@ -313,7 +318,7 @@ function vSync(){
 }
 const V={dash:vDash,events:vEvents,guests:vGuests,send:vSend,report:vReport,users:vUsers,orders:vOrders,sync:vSync};
 
-/* ─── EVENT VIEW (Admin/Client) ─── */
+/* ─── EVENT VIEW ─── */
 function rows(){
   const q=S.q.toLowerCase(),adm=S.u.role==='admin';
   const l=GS(S.eid).filter(g=>(!adm||gFilter(g,S.ef))&&(g.name+g.phone+(g.table||'')).toLowerCase().includes(q));
@@ -409,7 +414,7 @@ function show(r){
   navigator.vibrate&&navigator.vibrate(r.res==='ok'?[100]:[200,80,200]);beep(r.res==='ok');S.rc.unshift({n:g?.name||'QR si sahihi',r:r.res,t:Date.now()});S.rc=S.rc.slice(0,5);
   try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows2();$('#rc').innerHTML=rcHtml()}catch(e){}
 }
-const handle=c=>show(DB.scan(c.trim(),S.u.id,[S.eid]));
+const handle=async c=>{ const r=await DB.scanA(c.trim(),S.u.id,[S.eid]); show(r); };
 
 /* ─── DIALOG & MESSAGE ─── */
 const dlg=h=>{const d=$('#dg');d.innerHTML=h+`<div class="row" style="justify-content:center;margin-top:14px"><button class="b o" onclick="document.getElementById('dg').close()">Funga</button></div>`;if(!d.open)d.showModal()};
@@ -423,7 +428,6 @@ const msg=(g,e)=>{
   return `Kadi ya Mualiko\n\nHabari, ${g.name}!\nPokea kadi yako ya mwaliko kutoka kwa ${host}.\n\nUkumbi: ${e.venue} Saa ${e.time||''}\nCard No: ${cardNo}\n\nLocation: ${loc}\nMawasiliano: ${contact}\n${note}\nKARIBU SANA! 🎉\nInvio, Rafiki yako kwa shughuli yako\n\nUtaweza kufika?\n✅ Nitaweza Kufika: ${linkYes}\n❌ Sitaweza Kufika: ${linkNo}`;
 };
 const rf=()=>{const l=$('#gl'),s=$('#sb');if(l)l.innerHTML=gRows();if(s){s.hidden=!S.sel.size;s.innerHTML=sbar()}};
-
 async function apiRun(){
   const e=DB.ev(S.mev),t=S.dr.tpl||'mwaliko',ids=S.sq.slice(),bad=[];let ok=0;
   for(let i=0;i<ids.length;i++){
@@ -443,19 +447,32 @@ async function apiRun(){
 
 /* ─── ACTIONS ─── */
 const A={
-  setup(){
+  async setup(){
     const n=val('s_name'),p=val('s_pin');
     if(!n||p.length<4)return alert('Jina na PIN (tarakimu 4+) vinahitajika.');
     if(p!==val('s_pin2'))return alert('PIN hazilingani. Jaribu tena.');
-    DB.addUser({name:n,role:'admin',pin:p});S.u=DB.login(p);
-    try{sessionStorage.setItem('ngt_u',S.u.id)}catch(e){}render();
+    try{
+      DB.addUser({name:n,role:'admin',pin:p});
+      await DB.pushAll();
+      const u=await DB.loginRemote(p);
+      if(!u) return alert('Imetengenezwa lakini kuingia kumeshindikana. Jaribu kuingia na PIN uliyoweka.');
+      S.u=u;
+      try{sessionStorage.setItem('ngt_u',S.u.id)}catch(e){}
+      render();
+    }catch(e){ alert('Imeshindikana: '+e.message); }
   },
-  login(){
-    const u=DB.login(val('pin'));if(!u)return alert('PIN si sahihi. Jaribu tena.');
-    S.u=u;S.eid=null;S.tab='dash';
-    try{sessionStorage.setItem('ngt_u',u.id)}catch(e){}render();if(u.role==='admin')syncRsvp(true);
+  async login(){
+    const pin=val('pin');
+    if(!pin) return alert('Weka PIN kwanza.');
+    try{
+      const u=await DB.loginRemote(pin);
+      if(!u) return alert('PIN si sahihi. Jaribu tena.');
+      S.u=u;S.eid=null;S.tab='dash';
+      try{sessionStorage.setItem('ngt_u',u.id)}catch(e){}
+      render();if(u.role==='admin')syncRsvp(true);
+    }catch(e){ alert(e.message); }
   },
-  out(){S.u=null;S.eid=null;try{sessionStorage.removeItem('ngt_u')}catch(e){}render()},
+  out(){S.u=null;S.eid=null;try{sessionStorage.removeItem('ngt_u');sessionStorage.removeItem('ngt_pin')}catch(e){}render()},
   nav:d=>{S.eid=null;S.tab=d.k;S.q='';render();scrollTo(0,0)},
   open:d=>{S.eid=d.id;S.q='';render()},
   back(){S.eid=null;S.q='';render()},
@@ -487,12 +504,10 @@ const A={
     render();
   },
   cancelorder:d=>{if(confirm('Kataa agizo hili?')){DB.setOrder(d.id,'cancelled');render()}},
-  /* wageni – ndani ya tukio */
   addg(){addG(S.eid)&&render()},
   bulk(){alert(DB.importText(S.eid,val('g_bulk'))+' wageni wameongezwa.');render()},
   csvfile:(d,el)=>{const f=el.files[0];if(f){const r=new FileReader();r.onload=()=>{alert(DB.importText(S.eid,r.result)+' wageni wameongezwa.');render()};r.readAsText(f)}},
   delg:d=>{if(confirm('Futa mgeni huyu?')){DB.delGuest(d.id);render()}},
-  /* wageni – tab ya Wageni */
   gf:d=>{S.f=d.k;render()},
   gsel:d=>{S.sel.has(d.id)?S.sel.delete(d.id):S.sel.add(d.id);rf()},
   gsel2:d=>{S.sel.has(d.id)?S.sel.delete(d.id):S.sel.add(d.id);render()},
@@ -500,13 +515,11 @@ const A={
   bulk2(){alert(DB.importText(curE().id,val('g_bulk'))+' wageni wameongezwa.');render()},
   csvfile2:(d,el)=>{const f=el.files[0];if(f){const r=new FileReader();r.onload=()=>{alert(DB.importText(curE().id,r.result)+' wageni wameongezwa.');render()};r.readAsText(f)}},
   delg2:d=>{if(confirm('Futa mgeni huyu?')){DB.delGuest(d.id);S.sel.delete(d.id);render()}},
-  /* Tuma Mwaliko wizard */
   tosend:()=>{const e=curE();S.mev=e.id;S.dr=ldDr(e);S.step=3;S.tab='send';render();scrollTo(0,0)},
   sev:d=>{const e=DB.ev(d.id);S.mev=e.id;S.dr=ldDr(e);S.sel=defSel(e,S.dr.tpl||'mwaliko');S.step=2;render()},
   sendev:()=>{const e=DB.ev(S.eid);S.mev=e.id;S.dr=ldDr(e);S.sel=defSel(e,S.dr.tpl||'mwaliko');S.step=2;S.eid=null;S.tab='send';render();scrollTo(0,0)},
   stype:d=>{const e=DB.ev(S.mev),o=S.dr;S.dr=Object.assign(defDr(e,d.k),{map:o.map,pay:o.pay});S.sel=defSel(e,d.k);render()},
   sstep:d=>{const k=+d.k;if(k>=2&&!S.mev)return;if(k===4&&!S.sel.size)return alert('Chagua angalau mgeni mmoja.');S.step=k;render();scrollTo(0,0)},
-  gsel2:d=>{S.sel.has(d.id)?S.sel.delete(d.id):S.sel.add(d.id);render()},
   selu:()=>{S.sel=defSel(DB.ev(S.mev),S.dr.tpl||'mwaliko');render()},
   sela:()=>{S.sel=new Set(GS(S.mev).filter(g=>ph(g.phone)).map(g=>g.id));render()},
   selc:()=>{S.sel=new Set();render()},
@@ -545,7 +558,6 @@ const A={
   apitest:async()=>{try{await api('/api/rsvp?ev=_');toast('✅ Muunganisho sawa')}catch(e){alert('Imeshindikana: '+e.message)}},
   apiclear(){try{localStorage.removeItem('ngt_key')}catch(e){}render()},
   rsvp:()=>syncRsvp(false),
-  /* kadi */
   card:async d=>{
     const g=gst(d.id),e=DB.ev(g.eid);
     try{
@@ -587,12 +599,11 @@ const A={
     r.readAsText(f);
   },
   reset(){if(confirm('⚠ FUTA DATA YOTE?\n\nHii haitaweza kurudishwa. Hakikisha una backup kwanza.')){DB.reset();A.out()}},
-  /* staff */
   code(){const c=val('code').trim();if(c)handle(c);else alert('Weka code ya QR.')},
-  man:d=>show(DB.manual(d.id,S.u.id,[S.eid])),
-  walk(){
+  man:async d=>{ const r=await DB.manualA(d.id,S.u.id,[S.eid]); show(r); },
+  walk:async ()=>{
     if(!val('w_n'))return alert('Weka jina la mgeni.');
-    const g=DB.addGuest(S.eid,val('w_n'),val('w_p'),{table:'Walk-in'});show(DB.scan(g.code,S.u.id,[S.eid]));
+    const g=DB.addGuest(S.eid,val('w_n'),val('w_p'),{table:'Walk-in'});const r=await DB.scanA(g.code,S.u.id,[S.eid]);show(r);
   },
 };
 
@@ -618,7 +629,7 @@ render();
 if(S.u&&S.u.role==='admin')syncRsvp(true);
 setInterval(()=>{if(S.u&&S.u.role==='admin'&&KEY()&&!document.hidden&&!$('#dg').open)syncRsvp(true)},60000);
 
-/* ─── KADI YA QR (Amelipa) ─── */
+/* ─── KADI YA QR ─── */
 async function canvasToFile(canvas,jina){
   const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
   return new File([blob],jina,{type:'image/png'});
@@ -630,25 +641,4 @@ async function shareFileUjumbe(file,ujumbe,simu){
   window.open(`https://wa.me/${simu}?text=${encodeURIComponent(ujumbe)}`,'_blank');return false;
 }
 window.tumaKadiYaQR=async function(gId,skip){
-  const g=gst(gId),ev=g&&DB.ev(g.eid);
-  if(!g)return alert('Mgeni hajapatikana');
-  if(!skip&&!confirm(g.name+' amelipa mchango? Tuma Kadi ya QR?'))return;
-  const qr=new Image();qr.crossOrigin='anonymous';
-  qr.src=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(g.code||g.id)}`;
-  qr.onload=async()=>{
-    const cv=document.createElement('canvas');cv.width=800;cv.height=1100;
-    const c=cv.getContext('2d');
-    c.fillStyle='#fff';c.fillRect(0,0,800,1100);
-    c.fillStyle='#1a1a2e';c.fillRect(0,0,800,10);c.textAlign='center';
-    c.font='bold 32px Arial';c.fillText('KADI YA KUINGIA',400,80);
-    c.font='bold 38px Arial';c.fillText(g.name,400,140);
-    c.font='24px Arial';c.fillText(ev.name+' | '+ev.date,400,190);
-    c.drawImage(qr,250,230,300,300);
-    c.font='bold 28px Arial';c.fillText('ONESHA HII GETINI',400,620);
-    c.font='22px Arial';c.fillText('📍 '+ev.venue,400,680);
-    const file=await canvasToFile(cv,'QR-'+g.name+'.png');
-    const ujumbe=`Habari ${g.name}\nAsante! Malipo yamepokelewa ✅\nHii hapo juu ni Kadi yako ya kuingia yenye QR.\n📅 ${ev.date} | 📍 ${ev.venue}\nKuwa nayo siku ya tukio, utaionesha getini.\nKaribu Sana! - Nialike Go Tech`;
-    upd(g,{paid:true,qr:1});
-    await shareFileUjumbe(file,ujumbe,ph(g.phone||g.p||''));
-  };
-};
+  const g=gst(gId),ev=g&&DB.e
