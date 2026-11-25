@@ -16,18 +16,12 @@ function stop(){clearInterval(timer);if(stream){stream.getTracks().forEach(t=>t.
 /* ─── HELPERS ─── */
 const toast=m=>{let t=$('#ts');if(!t){t=document.createElement('div');t.id='ts';document.body.appendChild(t)}t.textContent=m;t.className='on';clearTimeout(t._t);t._t=setTimeout(()=>t.className='',2200)};
 const beep=ok=>{try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator();o.frequency.value=ok?880:220;o.connect(c.destination);o.start();setTimeout(()=>{o.stop();c.close()},ok?120:350)}catch(e){}};
-const X={g:(()=>{try{return JSON.parse(localStorage.getItem('ngt_x'))||{}}catch(e){return{}}})(),
- set(id,p){this.g[id]=Object.assign(this.g[id]||{},p);try{localStorage.setItem('ngt_x',JSON.stringify(this.g))}catch(e){}const g=DB.d.guests.find(x=>x.id===id);if(g)Object.assign(g,p)},
- apply(){DB.d.guests.forEach(g=>{if(this.g[g.id])Object.assign(g,this.g[g.id])})}};
-const upd=(g,p)=>X.set(g.id,p);
+const upd=(g,p)=>DB.updGuest(g.id,p);
+try{const o=JSON.parse(localStorage.getItem('ngt_x')||'null');if(o){Object.keys(o).forEach(id=>{if(DB.d.guests.some(g=>g.id===id))DB.updGuest(id,o[id])});localStorage.removeItem('ngt_x')}}catch(e){}
 const ph=p=>{let d=String(p||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d.startsWith('0'))d='255'+d.slice(1);else if(d.length===9)d='255'+d;return /^\d{11,15}$/.test(d)?d:''};
 const KEY=()=>{try{return localStorage.getItem('ngt_key')||''}catch(e){return''}};
 const api=async(path,body)=>{const r=await fetch(path,{method:body?'POST':'GET',headers:{'content-type':'application/json','x-portal-key':KEY()},body:body?JSON.stringify(body):undefined});let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j};
-const syncRsvp=async quiet=>{
-  if(!KEY())return;let n=0;
-  for(const e of EV()){try{const r=await api('/api/rsvp?ev='+encodeURIComponent(e.id));Object.keys(r.rsvp||{}).forEach(id=>{const g=DB.d.guests.find(x=>x.id===id);if(g&&g.rsvp!==r.rsvp[id]){X.set(id,{rsvp:r.rsvp[id]});n++}})}catch(x){if(!quiet)toast('RSVP: '+x.message);return}}
-  if(n){if(quiet&&/INPUT|TEXTAREA/.test((document.activeElement||{}).tagName||''))return toast('Majibu mapya: '+n);toast('Majibu mapya: '+n);render()}else if(!quiet)toast('Hakuna majibu mapya');
-};
+const syncRsvp=async quiet=>{if(!S.u)return;const ch=await DB.pull();if(!quiet)toast(ch?'Data imesasishwa':'Hakuna mabadiliko mapya')};
 const rsv=()=>{const l=GS(S.eid),y=l.filter(g=>g.rsvp==='yes').length,n=l.filter(g=>g.rsvp==='no').length;return `<p class="m">Wanashiriki ${y} · Hawashiriki ${n} · Hawajajibu ${l.length-y-n}</p>`};
 const rl=(a,g)=>`${location.origin}/api/r?a=${a}&ev=${g.eid}&g=${encodeURIComponent(g.id)}`;
 const addG=eid=>{
@@ -37,7 +31,7 @@ const addG=eid=>{
   const d=p&&GS(eid).find(g=>ph(g.phone)===ph(p));
   if(d&&!confirm('Namba hii ipo kwa '+d.name+'. Endelea?'))return false;
   const c=val('g_c')||'Kawaida',x=+val('g_x')||1,g=DB.addGuest(eid,n,p,{table:val('g_t'),cat:c,pax:x});
-  if(g&&g.id)X.set(g.id,{cat:c,pax:x});return true;
+  return true;
 };
 const markDone=(g,t)=>{if(t==='mwaliko')DB.markSent(g.id);else if(t==='qr'){DB.markSent(g.id);upd(g,{qr:1})}else if(t==='kumbusho')upd(g,{rem:1});else upd(g,{thx:1})};
 const ld=d=>new Date(String(d).length===10?d+'T00:00:00':d);
@@ -100,10 +94,15 @@ const rcHtml=()=>S.rc.length?`<div class="c"><h3>Scans za karibuni</h3>${S.rc.ma
 
 /* ─── RENDER ─── */
 function render(){
-  stop();X.apply();const a=$('#app');
+  stop();const a=$('#app');
   if(!DB.d.users.some(u=>u.role==='admin')){
     if(!location.search.includes('master=NIALIKE2024')){
-      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div><p class="m" style="color:#f87171">⛔ System imefungwa. Wasiliana na Admin mkuu.</p></div>`;return;
+      a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
+        <p class="m">Ingiza PIN yako</p>
+        <input id="pin" type="password" inputmode="numeric" placeholder="••••••" autofocus>
+        <button class="b full" data-a="login">Ingia</button>
+        <p class="m" style="margin:16px 0 6px">Kifaa kipya? Ingiza PIN yako tu (inahitaji intaneti). Bila intaneti tumia Pack:</p>
+        <label class="b o full" style="cursor:pointer;text-align:center">⬆ Pokea Pack ya Admin<input type="file" accept=".json" hidden data-a="impfile"></label></div>`;return;
     }
     a.innerHTML=`<div class="login"><div class="logo-lg">Nialike <i>Go Tech</i></div>
       <p class="m">Tengeneza akaunti ya Admin (mara ya kwanza tu)</p>
@@ -298,7 +297,7 @@ function vOrders(){
 function vSync(){
   return `<h2>Mipangilio – Sync</h2>
   <p class="m" style="margin-bottom:14px">Data iko kwenye kifaa hiki tu. Hamisha kati ya vifaa kwa faili la JSON.</p>
-  <div class="v4c"><h3>WhatsApp API na RSVP</h3><p class="m">Hali: ${KEY()?'✅ Funguo imewekwa (kutuma kiotomatiki)':'✋ Haijaunganishwa (kutuma kwa mkono)'}</p>
+  <div class="v4c"><h3>Cloud na WhatsApp</h3><p class="m">Cloud: ${DB.cloud==='ok'?'✅ Imeunganishwa':DB.cloud==='empty'?'⚠ Haina data bado (hamisha data ya kifaa hiki)':'… haijathibitishwa'}</p><div class="row" style="margin:8px 0"><button class="b o s" data-a="cloudpush">☁ Hamisha data ya kifaa hiki kwenda cloud</button></div><p class="m">Hali: ${KEY()?'✅ Funguo imewekwa (kutuma kiotomatiki)':'✋ Haijaunganishwa (kutuma kwa mkono)'}</p>
     <input id="k_key" type="password" placeholder="Funguo ya portal (PORTAL_KEY)" style="margin:8px 0">
     <div class="row"><button class="b" data-a="apikey">Hifadhi</button><button class="b o" data-a="apitest">Jaribu muunganisho</button><button class="b o" data-a="rsvp">🔄 Sync RSVP</button>${KEY()?'<button class="b r s" data-a="apiclear">Ondoa</button>':''}</div></div>
   <div class="v4c"><h3>Tuma data (admin → msimamizi)</h3>
@@ -409,7 +408,7 @@ function show(r){
   navigator.vibrate&&navigator.vibrate(r.res==='ok'?[100]:[200,80,200]);beep(r.res==='ok');S.rc.unshift({n:g?.name||'QR si sahihi',r:r.res,t:Date.now()});S.rc=S.rc.slice(0,5);
   try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows2();$('#rc').innerHTML=rcHtml()}catch(e){}
 }
-const handle=c=>show(DB.scan(c.trim(),S.u.id,[S.eid]));
+const handle=c=>DB.scanA(c.trim(),S.u.id,[S.eid]).then(show);
 
 /* ─── DIALOG & MESSAGE ─── */
 const dlg=h=>{const d=$('#dg');d.innerHTML=h+`<div class="row" style="justify-content:center;margin-top:14px"><button class="b o" onclick="document.getElementById('dg').close()">Funga</button></div>`;if(!d.open)d.showModal()};
@@ -447,15 +446,20 @@ const A={
     const n=val('s_name'),p=val('s_pin');
     if(!n||p.length<4)return alert('Jina na PIN (tarakimu 4+) vinahitajika.');
     if(p!==val('s_pin2'))return alert('PIN hazilingani. Jaribu tena.');
-    DB.addUser({name:n,role:'admin',pin:p});S.u=DB.login(p);
+    const u0=DB.addUser({name:n,role:'admin',pin:p});DB.setPin(p);S.u=u0;
     try{sessionStorage.setItem('ngt_u',S.u.id)}catch(e){}render();
   },
-  login(){
-    const u=DB.login(val('pin'));if(!u)return alert('PIN si sahihi. Jaribu tena.');
+  async login(){
+    const p=val('pin').trim();if(!p)return alert('Weka PIN.');
+    let u=DB.login(p);
+    if(!u){try{u=await DB.loginRemote(p)}catch(e){return alert(e.message)}}
+    if(!u)return alert('PIN si sahihi. Jaribu tena.');
     S.u=u;S.eid=null;S.tab='dash';
-    try{sessionStorage.setItem('ngt_u',u.id)}catch(e){}render();if(u.role==='admin')syncRsvp(true);
+    try{sessionStorage.setItem('ngt_u',u.id)}catch(e){}
+    render();
+    DB.pull().then(()=>{if(S.u&&S.u.role==='admin'&&DB.cloud==='empty')toast('☁ Cloud haina data. Mipangilio > Hamisha data.')});
   },
-  out(){S.u=null;S.eid=null;try{sessionStorage.removeItem('ngt_u')}catch(e){}render()},
+  out(){DB.setPin('');S.u=null;S.eid=null;try{sessionStorage.removeItem('ngt_u')}catch(e){}render()},
   nav:d=>{S.eid=null;S.tab=d.k;S.q='';render();scrollTo(0,0)},
   open:d=>{S.eid=d.id;S.q='';render()},
   back(){S.eid=null;S.q='';render()},
@@ -543,6 +547,7 @@ const A={
   gsave:d=>{const n=val('e_n').trim(),p=val('e_p').trim();if(!n)return alert('Jina linahitajika.');if(p&&!ph(p))return alert('Namba si sahihi.');upd(gst(d.id),{name:n,phone:p,table:val('e_t').trim(),cat:val('e_c'),pax:+val('e_x')||1});$('#dg').close();render()},
   apikey(){const k=val('k_key').trim();if(k.length<8)return alert('Funguo angalau herufi 8.');try{localStorage.setItem('ngt_key',k)}catch(e){}toast('Funguo imehifadhiwa');render()},
   apitest:async()=>{try{await api('/api/rsvp?ev=_');toast('✅ Muunganisho sawa')}catch(e){alert('Imeshindikana: '+e.message)}},
+  cloudpush:async()=>{if(!KEY())return alert('Weka funguo ya portal (PORTAL_KEY) hapa chini kwanza, kisha jaribu tena.');if(!confirm('Hamisha data yote ya kifaa hiki kwenda cloud? Vifaa vingine vitapata data hii.'))return;try{await DB.pushAll();toast('☁ Data imehamishwa');render()}catch(e){alert('Imeshindikana: '+e.message)}},
   apiclear(){try{localStorage.removeItem('ngt_key')}catch(e){}render()},
   rsvp:()=>syncRsvp(false),
   /* kadi */
@@ -589,10 +594,10 @@ const A={
   reset(){if(confirm('⚠ FUTA DATA YOTE?\n\nHii haitaweza kurudishwa. Hakikisha una backup kwanza.')){DB.reset();A.out()}},
   /* staff */
   code(){const c=val('code').trim();if(c)handle(c);else alert('Weka code ya QR.')},
-  man:d=>show(DB.manual(d.id,S.u.id,[S.eid])),
+  man:d=>DB.manualA(d.id,S.u.id,[S.eid]).then(show),
   walk(){
     if(!val('w_n'))return alert('Weka jina la mgeni.');
-    const g=DB.addGuest(S.eid,val('w_n'),val('w_p'),{table:'Walk-in'});show(DB.scan(g.code,S.u.id,[S.eid]));
+    const g=DB.addGuest(S.eid,val('w_n'),val('w_p'),{table:'Walk-in'});DB.scanA(g.code,S.u.id,[S.eid]).then(show);
   },
 };
 
@@ -615,8 +620,17 @@ document.addEventListener('input',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='pin')A.login();if(e.key==='Enter'&&e.target.id==='code')A.code()});
 $('#dg').addEventListener('close',()=>{if(S.u&&S.eid&&S.u.role==='admin')try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows()}catch(e){}});
 render();
-if(S.u&&S.u.role==='admin')syncRsvp(true);
-setInterval(()=>{if(S.u&&S.u.role==='admin'&&KEY()&&!document.hidden&&!$('#dg').open)syncRsvp(true)},60000);
+DB.onChange=()=>{
+  if(!S.u)return;
+  if(S.u.role==='staff'&&S.eid){try{$('#stats').innerHTML=stats();$('#gt').innerHTML=rows2()}catch(e){}return}
+  const el=document.activeElement;
+  if((el&&/INPUT|TEXTAREA|SELECT/.test(el.tagName))||$('#dg').open)return;
+  render();
+};
+DB.onAuth=()=>{if(S.u&&!S._af){S._af=1;alert('Akaunti yako imeondolewa au PIN imebadilika. Ingia tena.');A.out();setTimeout(()=>{S._af=0},3000)}};
+if(S.u)DB.pull();
+setInterval(()=>{if(S.u&&!document.hidden)DB.pull()},10000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.u)DB.pull()});
 
 /* ─── KADI YA QR (Amelipa) ─── */
 async function canvasToFile(canvas,jina){
