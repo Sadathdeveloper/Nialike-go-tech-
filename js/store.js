@@ -1,4 +1,4 @@
-/* DATA LAYER – FIXED – cache ya kifaa + cloud (Redis). PIN inathibitishwa na seva (/api/data). */
+/* DATA LAYER – cache ya kifaa + cloud (Supabase). PIN inathibitishwa na seva (/api/data). */
 const DB=(()=>{
 const K='ngt_db',QK='ngt_q',API='/api/data',CS=['users','events','guests','scans','orders'];
 const uid=p=>p+Math.random().toString(36).slice(2,8).toUpperCase();
@@ -52,8 +52,7 @@ load(){return d},
 loadRemote(){return Promise.resolve(d)},
 setPin(p){pin=String(p||'');blocked401=false;try{if(pin)sessionStorage.setItem('ngt_pin',pin);else sessionStorage.removeItem('ngt_pin')}catch(e){}api.authFailed=false;if(pin)sched(300)},
 user:id=>d.users.find(u=>u.id===id),
-// FIX 2: Login ya local imefungwa - lazima upitie seva kwanza. Tumia loginRemote.
-login(p){console.warn('login() ya local imezimwa, tumia loginRemote()');return null},
+login(p){return null}, // kuingia kunathibitishwa na seva tu: tumia loginRemote()
 async loginRemote(p){
   let r;
   try{r=await fetch(API,{headers:{'x-pin':String(p)}})}catch(e){throw new Error('Hakuna mtandao. Unganisha intaneti ili kuingia kwa mara ya kwanza kwenye kifaa hiki.')}
@@ -114,14 +113,12 @@ async scanA(code,by,allowed){
   if(!first){g.status='in';g.at=sat;d.scans.push(rec(code,by,'dup',g));cache();return{res:'dup',g}}
   g.status='in';g.at=at;d.scans.push(rec(code,by,'ok',g));cache();return{res:'ok',g};
 },
-// FIX 3: Manual sasa inatumia scanA - haitahesabu mara mbili
 manual(gid,by,allowed){const g=d.guests.find(x=>x.id===gid);if(!g)return{res:'invalid'};return localScan(g.code,by,allowed)},
 manualA(gid,by,allowed){const g=d.guests.find(x=>x.id===gid);if(!g)return Promise.resolve({res:'invalid'});return api.scanA(g.code,by,allowed)},
 stats(eid){const g=api.guests(eid),i=g.filter(x=>x.status==='in');return{total:g.length,in:i.length,pending:g.length-i.length,bad:0,pct:g.length?Math.round(i.length/g.length*100):0}},
 addOrder(o){const v={id:uid('NGT-'),at:Date.now(),status:'new',...o};d.orders.unshift(v);op({t:'order',v})},
 setOrder(id,st){const o=d.orders.find(x=>x.id===id);if(o){o.status=st;put('orders',o)}},
-// FIX 1: Export haina PIN tena
-exportPack(eid){const E=eid?d.events.filter(e=>e.id===eid):d.events;const safeUsers=(d.users||[]).map(u=>{const {pin,...rest}=u;return rest});return{v:1,at:Date.now(),events:E,guests:d.guests.filter(g=>eid?g.eid===eid:true),scans:d.scans.filter(s=>eid?s.eid===eid:true),users:safeUsers}},
+exportPack(eid){const E=eid?d.events.filter(e=>e.id===eid):d.events;return{v:1,at:Date.now(),events:E,guests:d.guests.filter(g=>eid?g.eid===eid:true),scans:d.scans.filter(s=>eid?s.eid===eid:true),users:(d.users||[]).map(u=>{const {pin,...rest}=u;return rest})}},
 importPack(p){
   if(!p||p.v!==1)throw new Error('Pack si sahihi');
   let c={e:0,g:0,s:0,u:0};
@@ -138,13 +135,10 @@ if(Q.length)sched(1500);
 return api})();
 
 const U={
-// FIX 6: Download inafuta kumbukumbu
 dl(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)},
 csv:rows=>'\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n'),
-// FIX 4: Phone inabaki na +
-phone:(p)=>{let s=String(p||'').replace(/[\s\-]/g,'');if(s.startsWith('00'))s='+'+s.slice(2);if(s.startsWith('0')&&s.length===10)s='+255'+s.slice(1);return s},
-// FIX 5: b64 mpya bila unescape/escape
-b64:o=>{const s=JSON.stringify(o);const bytes=new TextEncoder().encode(s);let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin)},
-unb64:s=>{const bin=atob(s);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return JSON.parse(new TextDecoder().decode(bytes))},
+phone:(p)=>{let s=String(p||'').replace(/\D/g,'');if(s.startsWith('00'))s=s.slice(2);if(s.startsWith('0')&&s.length===10)s='255'+s.slice(1);return s},
+b64:o=>{const bytes=new TextEncoder().encode(JSON.stringify(o));let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin)},
+unb64:s=>{const bin=atob(s),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return JSON.parse(new TextDecoder().decode(bytes))},
 inviteUrl(g,e){const u=new URL('invite.html',location.href);u.searchParams.set('g',g.id);u.searchParams.set('e',e.id);return u.toString()}
 };
