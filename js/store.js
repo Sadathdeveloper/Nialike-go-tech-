@@ -52,7 +52,7 @@ load(){return d},
 loadRemote(){return Promise.resolve(d)},
 setPin(p){pin=String(p||'');blocked401=false;try{if(pin)sessionStorage.setItem('ngt_pin',pin);else sessionStorage.removeItem('ngt_pin')}catch(e){}api.authFailed=false;if(pin)sched(300)},
 user:id=>d.users.find(u=>u.id===id),
-login(p){return null}, // kuingia kunathibitishwa na seva tu: tumia loginRemote()
+login(p){return null},
 async loginRemote(p){
   let r;
   try{r=await fetch(API,{headers:{'x-pin':String(p)}})}catch(e){throw new Error('Hakuna mtandao. Unganisha intaneti ili kuingia kwa mara ya kwanza kwenye kifaa hiki.')}
@@ -79,6 +79,10 @@ async pull(){
   }catch(e){return false}
 },
 async pushAll(){
+  if(!pin){
+    const adm=(d.users||[]).find(u=>u.role==='admin');
+    if(adm && adm.pin) api.setPin(adm.pin);
+  }
   const r=await fetch(API,{method:'POST',headers:H(),body:JSON.stringify({ops:[{t:'import',data:d}]})});
   const j=await r.json().catch(()=>({}));
   if(!r.ok||j.rej)throw new Error(j.error||(j.rej?'Seva imekataa (funguo si sahihi?)':'HTTP '+r.status));
@@ -135,10 +139,4 @@ if(Q.length)sched(1500);
 return api})();
 
 const U={
-dl(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)},
-csv:rows=>'\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n'),
-phone:(p)=>{let s=String(p||'').replace(/\D/g,'');if(s.startsWith('00'))s=s.slice(2);if(s.startsWith('0')&&s.length===10)s='255'+s.slice(1);return s},
-b64:o=>{const bytes=new TextEncoder().encode(JSON.stringify(o));let bin='';bytes.forEach(b=>bin+=String.fromCharCode(b));return btoa(bin)},
-unb64:s=>{const bin=atob(s),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return JSON.parse(new TextDecoder().decode(bytes))},
-inviteUrl(g,e){const u=new URL('invite.html',location.href);u.searchParams.set('g',g.id);u.searchParams.set('e',e.id);return u.toString()}
-};
+dl(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('
